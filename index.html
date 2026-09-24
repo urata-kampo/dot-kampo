@@ -1,0 +1,1889 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ドット漢方堂</title>
+<meta name="description" content="ファミコン風ドット絵の漢方薬局経営シミュレーション">
+<meta name="theme-color" content="#0c0c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ドット漢方堂">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts.css">
+</head>
+<body>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0c0c14; --panel:#000; --line:#fcfcfc; --text:#fcfcfc; --dim:#a8a8b8;
+  --gold:#f8b800; --red:#f83800; --green:#58d854; --blue:#3cbcfc; --pink:#f878f8; --brown:#ac7c00;
+  --font:"DotGothic16","Hiragino Kaku Gothic ProN","Yu Gothic","MS Gothic",monospace;
+}
+html,body{height:100%;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.6;padding-inline:max(16px,env(safe-area-inset-left));padding-block:max(12px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-bottom));-webkit-font-smoothing:none}
+*{box-sizing:border-box}
+#game{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+#hud{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:13px}
+.hud-cell{border:2px solid var(--line);background:var(--panel);padding:2px 6px;display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.hud-cell b{font-weight:normal;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-cell span{font-size:11px;color:var(--dim)}
+#screenwrap{position:relative;border:4px solid var(--line);box-shadow:0 0 0 4px #000, 0 0 0 6px #555;background:#000}
+#scene{display:block;width:100%;aspect-ratio:256/160;image-rendering:pixelated;image-rendering:crisp-edges}
+#toolbar{position:absolute;bottom:4px;left:4px;display:flex;gap:4px}
+#toolbar button{font-size:11px;padding:1px 6px;border-width:2px}
+.box{background:var(--panel);border:3px double var(--line);outline:2px solid #000;padding:10px 12px;position:relative}
+#panel{min-height:230px;display:flex;flex-direction:column;gap:8px}
+.speaker{color:var(--gold);font-size:13px}
+.msg{white-space:pre-wrap;min-height:3.2em}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:var(--font);font-size:14px;background:#000;color:var(--text);border:2px solid var(--line);padding:6px 10px;cursor:pointer;line-height:1.3}
+button:hover:not(:disabled),button:focus-visible{background:#fcfcfc;color:#000;outline:none}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.primary{border-color:var(--gold);color:var(--gold)}
+button.primary:hover:not(:disabled){background:var(--gold);color:#000}
+button.danger{border-color:var(--red);color:#fc7460}
+button.danger:hover:not(:disabled){background:var(--red);color:#fff}
+button.sel::before{content:"▶";color:var(--gold);margin-right:4px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.karte{border:2px dashed #7c7c7c;padding:6px 8px;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.karte .k{color:var(--blue)}
+.hearts{color:var(--red);letter-spacing:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px}
+.tabs button{font-size:12px;padding:3px 7px}
+.tabs button.on{background:var(--gold);color:#000;border-color:var(--gold)}
+.list{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;padding-right:4px}
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;padding:6px 8px;font-size:13px}
+.item .nm{font-size:15px}
+.item .rd{font-size:11px;color:var(--dim)}
+.item .ds{grid-column:1/-1;color:#d8d8d8;font-size:12px}
+.item:hover .ds,.item:focus-visible .ds,.item:hover .rd,.item:focus-visible .rd{color:#333}
+.badge{display:inline-block;font-size:10px;padding:0 3px;border:1px solid currentColor;margin-left:3px;vertical-align:1px}
+.b-kan{color:#fcb8b8}.b-mao{color:#b8b8f8}.b-dai{color:#d8f878}.b-bu{color:#fcd8a8}.b-nin{color:#f878f8}
+input[type=text]{font-family:var(--font);font-size:18px;background:#000;color:var(--gold);border:2px solid var(--line);padding:6px 10px;width:100%;max-width:320px}
+input[type=text]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.stock{font-variant-numeric:tabular-nums;font-size:12px;text-align:right;white-space:nowrap}
+.stock.zero{color:var(--red)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13px}
+td,th{padding:3px 4px;border-bottom:1px dotted #555;text-align:left;font-weight:normal}
+td.n{text-align:right;white-space:nowrap}
+tr.total td{border-top:2px solid var(--line);color:var(--gold)}
+tr.sub td{color:var(--dim);font-size:12px}
+.minus{color:#fc7460}.plus{color:var(--green)}
+.good{color:var(--green)}.bad{color:#fc7460}.warn{color:var(--gold)}
+.small{font-size:12px;color:var(--dim)}
+.order-row{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px dotted #444}
+.order-row button{padding:0 8px;font-size:14px}
+.order-row .q{min-width:2.2em;text-align:center;font-variant-numeric:tabular-nums;color:var(--gold)}
+.center{text-align:center}
+h2{font-size:18px;font-weight:normal;color:var(--gold);margin:0}
+h3{font-size:15px;font-weight:normal;color:var(--blue);margin:6px 0 2px}
+p{margin:0}
+.scroll{max-height:340px;overflow-y:auto;padding-right:4px;display:flex;flex-direction:column;gap:6px}
+.blink{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.blink{animation:none}}
+@media (max-width:440px){
+  body{font-size:14px}
+  #hud{grid-template-columns:repeat(2,1fr)}
+  .qgrid{grid-template-columns:1fr}
+  .order-row{grid-template-columns:1fr auto auto auto;}
+  .order-row .rd{display:none}
+}
+</style>
+
+<div id="game">
+  <div id="hud">
+    <div class="hud-cell"><span>ねんど・つき</span><b id="h-date">-</b></div>
+    <div class="hud-cell"><span>げんきん</span><b id="h-cash">-</b></div>
+    <div class="hud-cell"><span>ひょうばん</span><b id="h-rep">-</b></div>
+    <div class="hud-cell"><span>じょうれん</span><b id="h-reg">-</b></div>
+  </div>
+  <div id="screenwrap">
+    <canvas id="scene" width="256" height="160"></canvas>
+    <div id="toolbar">
+      <button id="btn-zukan" type="button">ずかん</button>
+      <button id="btn-help" type="button">きほん</button>
+      <button id="btn-ach" type="button">実績</button>
+      <button id="btn-snd" type="button">♪OFF</button>
+    </div>
+  </div>
+  <div id="panel" class="box"></div>
+</div>
+
+<script>
+// ===== 漢方データ =====
+// 分類は『漢方重要処方60』の効能分類にならう
+const CATS = [["all","すべて"],["hyo","発表剤"],["seinetsu","清熱剤"],["shage","瀉下剤"],["onpo","温補剤"],["ki","気剤"],["ketsu","血剤"],["risui","利水剤"],["ichou","健胃・整腸剤"],["hoeki","補益強壮剤"],["chinkai","鎮咳去痰剤"],["kinniku","筋肉・関節鎮痛剤"]];
+// kan=甘草(2は多い) mao=麻黄 dai=大黄 bushi=附子 ninpu=妊娠中は避ける(駆瘀血など)
+const F = {
+ // --- 発表剤 ---
+ keishi:{n:"桂枝湯",y:"けいしとう",cat:"hyo",p:2000,acute:1,kan:1,herbs:"桂皮・芍薬・大棗・甘草・生姜",
+   sho:"虚／寒／表",riron:"太陽病虚証",t:"体力がない人のかぜの初期。じわっと汗が出る（自汗）・軽い寒気・頭痛",
+   c:"発汗力は弱い。服用後に温かいものをすすり、厚着をしてじわっと汗をかくのがよい"},
+ kakkon:{n:"葛根湯",y:"かっこんとう",cat:"hyo",p:2200,acute:1,kan:1,mao:1,herbs:"葛根・麻黄・桂皮・芍薬・甘草・大棗・生姜",
+   sho:"実〜中間／寒／表",riron:"太陽病実証",t:"かぜの初期。寒気・汗が出ない（無汗）・首すじ〜肩背のこわばり。肩こりにも",
+   c:"麻黄を含む。高齢者・心臓病・高血圧・胃腸虚弱・妊娠中は注意。汗が出たら飲みすぎない"},
+ shosei:{n:"小青竜湯",y:"しょうせいりゅうとう",cat:"hyo",p:6000,kan:1,mao:1,herbs:"麻黄・桂皮・芍薬・乾姜・細辛・五味子・半夏・甘草",
+   sho:"中間／寒／水滞",riron:"太陽病＋水毒",t:"水のような鼻水・くしゃみ・うすい痰。冷えをともなう（花粉症・鼻炎）",
+   c:"麻黄を含む。高齢者・心臓病・排尿障害のある人は注意"},
+ mao:{n:"麻黄湯",y:"まおうとう",cat:"hyo",p:2200,acute:1,kan:1,mao:1,herbs:"麻黄・杏仁・桂皮・甘草",
+   sho:"実／寒／表",riron:"太陽病実証（症状が激しい）",t:"体力がある人の高熱・強い寒気・無汗・ふしぶしや腰の痛み",
+   c:"発汗作用が強い。虚弱な人・高齢者・心疾患には不向き。汗が出たら中止"},
+ maobushi:{n:"麻黄附子細辛湯",y:"まおうぶしさいしんとう",cat:"hyo",p:2600,acute:1,mao:1,bushi:1,herbs:"麻黄・附子・細辛",
+   sho:"虚／寒（陰）",riron:"直中の少陰（いきなり冷えから始まるかぜ）",t:"高齢者や冷え性の人のかぜ。布団をかけても止まらない強い寒気・だるくて横になりたい・冷たい水様の鼻水",
+   c:"附子・麻黄を含む。のぼせ・動悸に注意。熱感が強いかぜには不向き"},
+ jumi:{n:"十味敗毒湯",y:"じゅうみはいどくとう",cat:"hyo",p:6200,kan:1,herbs:"柴胡・桜皮・桔梗・川芎・茯苓・独活・防風・荊芥・甘草・生姜",
+   sho:"中間／表の熱",riron:"表の瘀血・炎症を発表する",t:"化膿しやすい皮膚炎・じんましん・根の浅い湿疹。初期のかゆみの強い皮膚疾患",
+   c:"一時的に悪化（瞑眩）することがある。ジュクジュクが強いものは消風散"},
+ kufu:{n:"駆風解毒湯",y:"くふうげどくとう",cat:"hyo",p:2400,acute:1,kan:1,herbs:"防風・牛蒡子・連翹・荊芥・羌活・桔梗・石膏・甘草",
+   sho:"中間／熱",riron:"温病のかぜ（のどから始まる）",t:"のどが腫れて痛むかぜ・扁桃炎。お湯にとかし、うがいしながら飲む",
+   c:"冷やす性質。寒気が強いかぜには不向き"},
+ shini:{n:"辛夷清肺湯",y:"しんいせいはいとう",cat:"hyo",p:6400,herbs:"辛夷・知母・百合・黄芩・山梔子・麦門冬・石膏・升麻・枇杷葉",
+   sho:"中間〜実／熱",riron:"鼻の強い炎症（熱証）",t:"鼻づまりが強く、黄色くねばい鼻水・蓄膿症（慢性副鼻腔炎）・鼻の熱感",
+   c:"甘草を含まない。冷やす処方なので、水っぽい鼻水には不向き"},
+ shofu:{n:"消風散",y:"しょうふうさん",cat:"hyo",p:6600,kan:1,herbs:"当帰・地黄・石膏・防風・蒼朮・木通・牛蒡子・知母・胡麻・蝉退・苦参・荊芥・甘草",
+   sho:"中間〜実／湿熱",riron:"湿邪と血のうっ滞による皮膚の炎症",t:"かゆみが強く、ジュクジュク分泌物が多い湿疹。汗や梅雨〜夏に悪化",
+   c:"胃腸が弱い人は胃もたれに注意。一時的な悪化に注意"},
+ // --- 清熱剤 ---
+ byakko:{n:"白虎加人参湯",y:"びゃっこかにんじんとう",cat:"seinetsu",p:3000,acute:1,kan:1,herbs:"知母・石膏・粳米・人参・甘草",
+   sho:"実／熱",riron:"陽明病（裏の熱）",t:"ひどい口の渇き・大汗・ほてり。熱中症・暑気あたり",
+   c:"強く冷やす処方。冷えのある人・胃腸が弱い人には不向き"},
+ oren:{n:"黄連解毒湯",y:"おうれんげどくとう",cat:"seinetsu",p:5800,herbs:"黄連・黄芩・黄柏・山梔子",
+   sho:"中間〜実／熱",riron:"裏熱（陽明病）",t:"赤ら顔・のぼせ・イライラ・口が苦い・胃の炎症・二日酔い",
+   c:"甘草を含まない。冷えのある人には不向き"},
+ shosaiko:{n:"小柴胡湯",y:"しょうさいことう",cat:"seinetsu",p:3200,acute:1,kan:1,herbs:"柴胡・半夏・黄芩・大棗・人参・甘草・生姜",
+   sho:"中間／半表半裏",riron:"少陽病の代表処方",t:"こじれたかぜ・微熱や往来寒熱・食欲不振・口が苦い・胸脇苦満",
+   c:"間質性肺炎の報告あり。服用中の空咳・息切れ・発熱はすぐ受診"},
+ daisaiko:{n:"大柴胡湯",y:"だいさいことう",cat:"seinetsu",p:6400,dai:1,herbs:"柴胡・半夏・黄芩・芍薬・大棗・枳実・生姜・大黄",
+   sho:"実／熱",riron:"少陽病実証",t:"がっしり体型で、みぞおち〜脇腹の強い張り（胸脇苦満）・便秘・肩こり",
+   c:"大黄を含む。虚弱な人・妊娠中は注意"},
+ saikokei:{n:"柴胡桂枝湯",y:"さいこけいしとう",cat:"seinetsu",p:3000,acute:1,kan:1,herbs:"柴胡・半夏・黄芩・人参・桂皮・芍薬・大棗・生姜・甘草",
+   sho:"中間〜虚／半表半裏",riron:"少陽病＋太陽病虚証（小柴胡湯＋桂枝湯）",t:"こじれたかぜ。微熱・寝汗・吐き気・みぞおちのつかえ。まだ少し寒気や頭痛",
+   c:"かぜの中期以降に"},
+ // --- 瀉下剤 ---
+ sanou:{n:"三黄瀉心湯",y:"さんおうしゃしんとう",cat:"shage",p:5000,dai:1,herbs:"大黄・黄連・黄芩",
+   sho:"実／熱",riron:"陽明病（裏熱・出血）",t:"のぼせが強い・イライラ・鼻血や目の充血・頑固な便秘・血圧が高め",
+   c:"大黄を含む。虚弱な人・妊娠中は不向き"},
+ bofu:{n:"防風通聖散",y:"ぼうふうつうしょうさん",cat:"shage",p:6600,kan:1,mao:1,dai:1,herbs:"麻黄・大黄・芒硝・石膏・荊芥・防風など18種",
+   sho:"実／熱",riron:"表裏ともに実（食毒・水毒）",t:"体力があり、おなかに皮下脂肪が多い・便秘がち・暑がり",
+   c:"実証の人向け。胃腸の弱い人が使うと下痢で体力を消耗する"},
+ mashinin:{n:"麻子仁丸",y:"ましにんがん",cat:"shage",p:5000,dai:1,herbs:"麻子仁・大黄・枳実・厚朴・杏仁・芍薬",
+   sho:"虚〜中間／津液不足",riron:"腸の潤い不足による便秘",t:"高齢者などのコロコロとした硬い便（兎糞状）",
+   c:"大黄を含む。妊娠中は注意。下痢しやすい人は減量"},
+ otsuji:{n:"乙字湯",y:"おつじとう",cat:"shage",p:5200,kan:1,dai:1,herbs:"当帰・柴胡・黄芩・升麻・大黄・甘草",
+   sho:"中間／熱",riron:"便秘をともなう痔",t:"便秘がちで、いぼ痔・切れ痔・排便時の出血や痛み",
+   c:"大黄を含む。妊娠中・下痢しやすい人は注意"},
+ // --- 温補剤 ---
+ shinbu:{n:"真武湯",y:"しんぶとう",cat:"onpo",p:6400,bushi:1,herbs:"茯苓・芍薬・蒼朮・生姜・附子",
+   sho:"虚／寒／水滞",riron:"少陰病で水毒をともなう",t:"冷えが強く体力がない人の水様の下痢・めまい・むくみ・夜間頻尿",
+   c:"甘草を含まない。附子を含むので、のぼせや熱感が強い人には不向き"},
+ ryokyo:{n:"苓姜朮甘湯",y:"りょうきょうじゅつかんとう",cat:"onpo",p:5800,kan:1,herbs:"茯苓・乾姜・白朮・甘草",
+   sho:"虚／寒／水滞",riron:"陰病で下半身の冷えと水毒",t:"腰から下が水につかったように冷えて重だるい・薄い尿が多い・夜間頻尿",
+   c:"下半身の冷えと重さがポイント"},
+ saikokan:{n:"柴胡桂枝乾姜湯",y:"さいこけいしかんきょうとう",cat:"onpo",p:6200,kan:1,herbs:"柴胡・黄芩・栝楼根・桂皮・牡蛎・乾姜・甘草",
+   sho:"虚／寒熱錯雑",riron:"少陽病の中で最も虚証のもの",t:"疲れやすく、背中がゾクゾク・首から上に汗・動悸・息切れ・かぜをひきやすい",
+   c:"虚弱な人のこじれたかぜや神経過敏に"},
+ goshuyu:{n:"呉茱萸湯",y:"ごしゅゆとう",cat:"onpo",p:6400,herbs:"呉茱萸・人参・大棗・生姜",
+   sho:"虚／寒",riron:"厥陰病（冷えによる気の上衝）",t:"手足が冷え、吐き気や嘔吐をともなう頭痛（片頭痛）",
+   c:"甘草を含まない。とても苦い"},
+ // --- 気剤 ---
+ hange:{n:"半夏厚朴湯",y:"はんげこうぼくとう",cat:"ki",p:6000,herbs:"半夏・厚朴・茯苓・蘇葉・生姜",
+   sho:"中間／気滞",riron:"気滞（行気）",t:"のどに何かつかえた感じ（梅核気）・不安・気分がふさぐ・咳",
+   c:"甘草を含まない。気のめぐりをよくする"},
+ ryokei:{n:"苓桂朮甘湯",y:"りょうけいじゅつかんとう",cat:"ki",p:5800,kan:1,herbs:"茯苓・桂皮・白朮・甘草",
+   sho:"虚〜中間／水滞＋気の上衝",riron:"気の上衝と胃の水毒",t:"立ちくらみ・ふらつくめまい・頭が重い・動悸・胃でチャポチャポ音",
+   c:"のぼせをともなうめまいによい"},
+ kanbaku:{n:"甘麦大棗湯",y:"かんばくたいそうとう",cat:"ki",p:5400,kan:2,herbs:"甘草・小麦・大棗",
+   sho:"虚／気の失調",riron:"鎮静（気剤）",t:"泣いたり悲しんだり情緒不安定・あくびが多い・子どもの夜泣きやひきつけ",
+   c:"甘草が多い！ 長期連用・他の甘草製剤との重複に注意"},
+ saikoryu:{n:"柴胡加竜骨牡蛎湯",y:"さいこかりゅうこつぼれいとう",cat:"ki",p:6800,dai:1,herbs:"柴胡・半夏・茯苓・桂皮・黄芩・大棗・人参・竜骨・牡蛎・生姜・（大黄）",
+   sho:"実／熱",riron:"少陽病（胸腹部の熱で気が上衝）",t:"比較的体力がある人の動悸・不安・イライラ・驚きやすい・不眠・胸脇苦満",
+   c:"メーカーにより大黄を含む。虚弱な人には桂枝加竜骨牡蛎湯"},
+ keiryu:{n:"桂枝加竜骨牡蛎湯",y:"けいしかりゅうこつぼれいとう",cat:"ki",p:6400,kan:1,herbs:"桂皮・芍薬・大棗・竜骨・牡蛎・甘草・生姜",
+   sho:"虚／気の上衝",riron:"正気不足で気を留められない",t:"体力がなく神経過敏。精神疲労・不眠・夢が多い・動悸・寝汗",
+   c:"柴胡加竜骨牡蛎湯の虚証版"},
+ choto:{n:"釣藤散",y:"ちょうとうさん",cat:"ki",p:6400,kan:1,herbs:"釣藤鈎・陳皮・半夏・麦門冬・茯苓・人参・菊花・防風・石膏・甘草・生姜",
+   sho:"中間／肝経の気の上衝",riron:"肝経の気の上衝",t:"中高年の朝方の頭痛・頭重・めまい・肩こり。朝に血圧が上がりやすい",
+   c:"慢性の頭痛に"},
+ yokkan:{n:"抑肝散",y:"よくかんさん",cat:"ki",p:6400,kan:1,herbs:"釣藤鈎・柴胡・当帰・川芎・蒼朮・茯苓・甘草",
+   sho:"虚〜中間／肝の高ぶり",riron:"肝の虚熱による興奮",t:"イライラ・怒りっぽい・歯ぎしり・子どもの夜泣きや疳の虫・筋肉のひきつれ",
+   c:"神経の高ぶりをしずめる"},
+ sanso:{n:"酸棗仁湯",y:"さんそうにんとう",cat:"ki",p:6200,kan:1,herbs:"酸棗仁・茯苓・川芎・知母・甘草",
+   sho:"虚／心身疲労",riron:"血虚による不眠",t:"心身が疲れているのに眠れない・眠りが浅い",
+   c:"疲れすぎて眠れない人に"},
+ // --- 血剤 ---
+ toki:{n:"当帰芍薬散",y:"とうきしゃくやくさん",cat:"ketsu",p:6200,herbs:"当帰・芍薬・川芎・茯苓・蒼朮・沢瀉",
+   sho:"虚／寒／血虚＋水滞",riron:"陰病の婦人科疾患",t:"色白で冷え性・むくみ・月経痛・めまい・疲れやすい。妊娠中にも使える",
+   c:"甘草を含まない。胃腸が弱い人は胃もたれに注意"},
+ unsei:{n:"温清飲",y:"うんせいいん",cat:"ketsu",p:6400,herbs:"当帰・地黄・芍薬・川芎・黄連・黄芩・黄柏・山梔子",
+   sho:"中間／血虚＋熱",riron:"四物湯＋黄連解毒湯",t:"皮膚がカサカサ乾燥して赤みとかゆみがある・のぼせ・月経不順",
+   c:"甘草を含まない。胃腸が弱い人は注意"},
+ kyuki:{n:"芎帰膠艾湯",y:"きゅうききょうがいとう",cat:"ketsu",p:6400,kan:1,herbs:"川芎・当帰・芍薬・地黄・阿膠・艾葉・甘草",
+   sho:"虚／寒／血虚",riron:"止血（補血）",t:"月経量が多い・だらだら続く不正出血・痔の出血。貧血・冷えをともなう",
+   c:"発熱や炎症をともなう出血には不向き。原因の確認（受診）も大切"},
+ juzen:{n:"十全大補湯",y:"じゅうぜんたいほとう",cat:"ketsu",p:7000,kan:1,herbs:"人参・黄耆・蒼朮・茯苓・当帰・芍薬・地黄・川芎・桂皮・甘草",
+   sho:"虚／気血両虚",riron:"補血＋補気",t:"病後・術後・産後の体力低下・顔色が悪い・貧血ぎみ・冷え・寝汗",
+   c:"地黄で胃もたれすることがある"},
+ kamikihi:{n:"加味帰脾湯",y:"かみきひとう",cat:"ketsu",p:7000,kan:1,herbs:"人参・白朮・茯苓・酸棗仁・竜眼肉・黄耆・当帰・遠志・柴胡・山梔子・木香・大棗・生姜・甘草",
+   sho:"虚／気血両虚＋熱",riron:"補血・補気・安神",t:"疲れているのに眠れない・くよくよ考えこむ・物忘れ・貧血・微熱が続く",
+   c:"心身が疲れ果てたタイプに"},
+ kami:{n:"加味逍遙散",y:"かみしょうようさん",cat:"ketsu",p:6600,kan:1,herbs:"柴胡・芍薬・蒼朮・当帰・茯苓・山梔子・牡丹皮・薄荷・生姜・甘草",
+   sho:"虚／気滞・血虚・熱",riron:"血虚による熱症状",t:"更年期のほてり・発汗・イライラ・肩こり。症状があちこち変わる（不定愁訴）",
+   c:"更年期の精神症状に最も多く用いられる"},
+ keibuku:{n:"桂枝茯苓丸",y:"けいしぶくりょうがん",cat:"ketsu",p:6200,ninpu:1,herbs:"桂皮・茯苓・牡丹皮・桃仁・芍薬",
+   sho:"中間〜実／瘀血",riron:"駆瘀血",t:"比較的体力がある人ののぼせ・足冷え・月経痛・経血の塊・肩こり",
+   c:"甘草を含まない。駆瘀血剤なので妊娠中は避ける"},
+ tokaku:{n:"桃核承気湯",y:"とうかくじょうきとう",cat:"ketsu",p:6000,kan:1,dai:1,ninpu:1,herbs:"桃仁・桂皮・大黄・芒硝・甘草",
+   sho:"実／瘀血＋熱",riron:"陽明病（瘀血と便秘）",t:"強いのぼせ・イライラ・頑固な便秘・月経痛・赤黒い経血・あごのふきでもの",
+   c:"大黄・芒硝を含む。妊娠中は禁忌レベルで避ける"},
+ // --- 利水剤 ---
+ gorei:{n:"五苓散",y:"ごれいさん",cat:"risui",p:5800,herbs:"沢瀉・猪苓・茯苓・蒼朮・桂皮",
+   sho:"虚実問わず／水滞",riron:"水毒（利水の基本）",t:"のどが渇くのに尿が少ない・むくみ・雨の前の頭痛・二日酔い・水様の下痢や嘔吐",
+   c:"甘草を含まない。水のかたよりを整える代表処方"},
+ chorei:{n:"猪苓湯",y:"ちょれいとう",cat:"risui",p:3200,acute:1,herbs:"猪苓・茯苓・沢瀉・阿膠・滑石",
+   sho:"中間／水滞＋熱",riron:"膀胱の炎症と水毒",t:"排尿痛・残尿感・頻尿・血尿・口の渇き（膀胱炎様）",
+   c:"甘草を含まない。発熱・腰背部痛があれば受診を"},
+ gorin:{n:"五淋散",y:"ごりんさん",cat:"risui",p:5600,kan:1,herbs:"茯苓・当帰・黄芩・芍薬・山梔子・地黄・沢瀉・木通・滑石・車前子・甘草",
+   sho:"中間／湿熱",riron:"淋証（排尿の不調）",t:"残尿感・排尿痛がくり返す慢性の膀胱炎。炎症は猪苓湯より軽め",
+   c:"くり返す膀胱炎の体質改善に"},
+ sairei:{n:"柴苓湯",y:"さいれいとう",cat:"risui",p:3400,acute:1,kan:1,herbs:"小柴胡湯＋五苓散（柴胡・黄芩・半夏・人参・沢瀉・猪苓・茯苓・蒼朮・桂皮・甘草など）",
+   sho:"中間／半表半裏＋水滞",riron:"少陽病＋水毒",t:"水様の下痢・吐き気・口渇・尿が少ない。夏かぜ・胃腸かぜ。むくみ",
+   c:"小柴胡湯と同様、空咳・息切れに注意"},
+ // --- 健胃・整腸剤 ---
+ hangesha:{n:"半夏瀉心湯",y:"はんげしゃしんとう",cat:"ichou",p:5600,kan:1,herbs:"半夏・黄芩・黄連・乾姜・人参・大棗・甘草",
+   sho:"中間／寒熱錯雑",riron:"心下痞（みぞおちのつかえ）",t:"みぞおちのつかえ・おなかがゴロゴロ鳴る・しぶり腹の下痢・吐き気・口内炎",
+   c:"ストレス性の胃腸症状にも"},
+ bukuryo:{n:"茯苓飲",y:"ぶくりょういん",cat:"ichou",p:5400,herbs:"茯苓・白朮・人参・陳皮・枳実・生姜",
+   sho:"虚／水滞",riron:"胃の虚証で水逆",t:"胃がふくれて胃内でチャポチャポ・胸やけ・突き上げる吐き気（つわりにも）",
+   c:"甘草を含まない"},
+ heii:{n:"平胃散",y:"へいいさん",cat:"ichou",p:4800,acute:1,kan:1,herbs:"蒼朮・厚朴・陳皮・大棗・甘草・生姜",
+   sho:"中間／湿",riron:"食べすぎ（食毒）と湿",t:"食べすぎ・飲みすぎによる胃もたれ・おなかの張り・ガス",
+   c:"胃腸が極端に弱い人には六君子湯"},
+ anchu:{n:"安中散",y:"あんちゅうさん",cat:"ichou",p:5400,kan:1,herbs:"桂皮・延胡索・牡蛎・茴香・縮砂・良姜・甘草",
+   sho:"虚／寒",riron:"太陰病（冷えとストレスの胃痛）",t:"やせ型で冷えるとキリキリ胃が痛む・胸やけ。月経痛にも",
+   c:"下痢には不向き。黒い便など出血の兆候は受診"},
+ // --- 補益強壮剤 ---
+ ninjin:{n:"人参湯",y:"にんじんとう",cat:"hoeki",p:5800,kan:1,herbs:"人参・白朮・乾姜・甘草",
+   sho:"虚／寒",riron:"太陰病（脾胃虚寒）",t:"胃腸が冷えて弱い・冷たいもので下痢や腹痛・薄いつばが多い・口は渇かない",
+   c:"冷えが強い場合は附子を加えることも"},
+ rikkun:{n:"六君子湯",y:"りっくんしとう",cat:"hoeki",p:6000,kan:1,herbs:"人参・蒼朮・茯苓・半夏・陳皮・大棗・生姜・甘草",
+   sho:"虚／気虚＋水滞",riron:"脾胃の気虚",t:"胃腸が弱い・胃もたれ・食欲不振・みぞおちでチャポチャポ音",
+   c:"四君子湯の派生。胃の気を補い水をさばく"},
+ hochu:{n:"補中益気湯",y:"ほちゅうえっきとう",cat:"hoeki",p:6800,kan:1,herbs:"黄耆・人参・蒼朮・当帰・陳皮・柴胡・升麻・大棗・生姜・甘草",
+   sho:"虚／気虚",riron:"脾胃と肺の虚証",t:"疲れやすい・食後に眠い・声に力がない・寝汗・内臓下垂。妊娠中のかぜにも",
+   c:"『医王湯』とも呼ばれる。実証の人には不要"},
+ shoken:{n:"小建中湯",y:"しょうけんちゅうとう",cat:"hoeki",p:5600,kan:1,herbs:"芍薬・桂皮・大棗・甘草・生姜・膠飴",
+   sho:"虚／寒",riron:"太陰病（中焦を建てる）",t:"虚弱体質の子どものおなかの痛み・疲れやすい・夜尿・寝汗",
+   c:"子どもにも飲みやすい甘い味"},
+ daiken:{n:"大建中湯",y:"だいけんちゅうとう",cat:"hoeki",p:6000,herbs:"山椒・人参・乾姜・膠飴",
+   sho:"虚／寒",riron:"太陰病（腹部の冷えと痛み）",t:"おなかが冷えて張る・ガスがたまる・腸がぐるぐる動いて痛む",
+   c:"甘草を含まない。腹部術後の腸の動きにも用いられる"},
+ hachimi:{n:"八味地黄丸",y:"はちみじおうがん",cat:"hoeki",p:6400,bushi:1,herbs:"地黄・山茱萸・山薬・沢瀉・茯苓・牡丹皮・桂皮・附子",
+   sho:"虚／寒／腎虚",riron:"腎虚（補腎）",t:"高齢者の夜間頻尿・腰痛・足腰の冷えとしびれ・口の渇き",
+   c:"甘草を含まない。胃腸が弱い人は胃もたれに注意。のぼせる人には六味丸"},
+ rokumi:{n:"六味丸",y:"ろくみがん",cat:"hoeki",p:6200,herbs:"地黄・山茱萸・山薬・沢瀉・茯苓・牡丹皮",
+   sho:"虚／熱／腎虚（陰虚）",riron:"腎虚で冷えのないもの",t:"足腰のだるさ・手足のほてり・口の渇き・寝汗。冷えはない。子どもの発育にも",
+   c:"八味地黄丸から附子と桂皮をのぞいたもの"},
+ goshajin:{n:"牛車腎気丸",y:"ごしゃじんきがん",cat:"hoeki",p:6800,bushi:1,herbs:"八味地黄丸＋牛膝・車前子",
+   sho:"虚／寒／腎虚＋水滞",riron:"八味地黄丸証に下半身の症状が強いもの",t:"八味地黄丸の症状に加え、足のしびれ・痛み・むくみが強い",
+   c:"甘草を含まない。附子を含む"},
+ seishin:{n:"清心蓮子飲",y:"せいしんれんしいん",cat:"hoeki",p:6600,kan:1,herbs:"蓮肉・麦門冬・茯苓・人参・車前子・黄芩・黄耆・地骨皮・甘草",
+   sho:"虚／熱（虚熱）",riron:"胃腸虚弱で上に熱、下は腎虚",t:"胃腸が弱く冷え性で、残尿感・頻尿・尿のにごり。イライラ・不眠をともなう",
+   c:"胃腸が弱い人の排尿トラブルに"},
+ // --- 鎮咳去痰剤 ---
+ makyo:{n:"麻杏甘石湯",y:"まきょうかんせきとう",cat:"chinkai",p:3000,acute:1,kan:1,mao:1,herbs:"麻黄・杏仁・石膏・甘草",
+   sho:"中間〜実／熱",riron:"肺の熱",t:"激しい咳・ねばい痰・汗ばむ・口の渇き。ゼーゼーする咳（ぜんそく様）",
+   c:"麻黄を含む。高齢者・心疾患は注意"},
+ bakumon:{n:"麦門冬湯",y:"ばくもんどうとう",cat:"chinkai",p:3000,acute:1,kan:1,herbs:"麦門冬・半夏・粳米・大棗・人参・甘草",
+   sho:"虚／津液不足（陰虚）",riron:"津液不足ののどの炎症",t:"痰が少なく切れにくい、突き上げるから咳・のどの乾燥・顔が赤くなるほど咳きこむ",
+   c:"潤いを補う。水っぽい痰が多い咳には不向き"},
+ saiboku:{n:"柴朴湯",y:"さいぼくとう",cat:"chinkai",p:6600,kan:1,herbs:"小柴胡湯＋半夏厚朴湯",
+   sho:"中間／気滞＋半表半裏",riron:"少陽病＋気滞",t:"胸からのどにかけての苦しさ・痰がからむ咳・不安で悪化するぜんそく（寛解期の体質改善）",
+   c:"小柴胡湯を含むので空咳・息切れ・発熱に注意"},
+ ryokan:{n:"苓甘姜味辛夏仁湯",y:"りょうかんきょうみしんげにんとう",cat:"chinkai",p:6200,kan:1,herbs:"茯苓・甘草・乾姜・五味子・細辛・半夏・杏仁",
+   sho:"虚／寒／水滞",riron:"小青竜湯の証で麻黄が使えないもの",t:"うすい鼻水・水っぽい痰・冷え。体力がない人・高齢者の小青竜湯がわり",
+   c:"麻黄を含まない"},
+ // --- 筋肉・関節鎮痛剤 ---
+ mayoku:{n:"麻杏薏甘湯",y:"まきょうよくかんとう",cat:"kinniku",p:5600,kan:1,mao:1,herbs:"麻黄・杏仁・薏苡仁・甘草",
+   sho:"中間／湿",riron:"湿邪による痺証",t:"関節や筋肉の痛みと重だるさ。梅雨・長雨・低気圧で悪化。いぼにも",
+   c:"麻黄を含む。胃腸虚弱の人は胃もたれに注意"},
+ keijutsu:{n:"桂枝加朮附湯",y:"けいしかじゅつぶとう",cat:"kinniku",p:6200,kan:1,bushi:1,herbs:"桂皮・芍薬・蒼朮・大棗・甘草・生姜・附子",
+   sho:"虚／寒＋湿",riron:"寒湿による痺証",t:"冷えると悪化する関節痛・神経痛・手足のしびれ。湿気で痛みが増す",
+   c:"附子を含む。熱感や腫れの強い関節には不向き"},
+ shakukan:{n:"芍薬甘草湯",y:"しゃくやくかんぞうとう",cat:"kinniku",p:1800,acute:1,kan:2,herbs:"芍薬・甘草",
+   sho:"虚実問わず",riron:"筋肉の緊張・けいれん",t:"急なこむら返り・筋肉のけいれん痛。頓服向き",
+   c:"甘草が多い！ 連用・高血圧・利尿薬服用中は偽アルドステロン症に注意"},
+ goshaku:{n:"五積散",y:"ごしゃくさん",cat:"kinniku",p:6200,kan:1,mao:1,herbs:"蒼朮・陳皮・茯苓・半夏・当帰・厚朴・芍薬・川芎・白芷・枳殻・桔梗・乾姜・桂皮・麻黄・大棗・甘草",
+   sho:"中間／寒＋湿",riron:"寒・湿・気・血・痰の5つのとどこおり",t:"冷房や冷えで悪化する慢性の腰痛・下腹部痛。上半身は熱く下半身が冷える",
+   c:"麻黄を含む"},
+ boi:{n:"防已黄耆湯",y:"ぼういおうぎとう",cat:"kinniku",p:6000,kan:1,herbs:"防已・黄耆・蒼朮・大棗・生姜・甘草",
+   sho:"虚／水滞（表虚）",riron:"表の水毒",t:"色白で水太り・汗かき・疲れやすい・ひざの痛みや腫れ・下半身のむくみ",
+   c:"気を補いながら水をさばく"},
+ sokei:{n:"疎経活血湯",y:"そけいかっけつとう",cat:"kinniku",p:6600,kan:1,ninpu:1,herbs:"芍薬・地黄・川芎・当帰・桃仁・蒼朮・茯苓・威霊仙・羌活・牛膝・防已・防風・竜胆など17種",
+   sho:"中間／瘀血＋湿",riron:"風湿の痺証に瘀血・血虚",t:"腰から足にかけての痛み・しびれ。夜間や明け方に悪化する",
+   c:"桃仁・牛膝を含むので妊娠中は避ける"}
+};
+const FIDS = Object.keys(F);
+
+// ===== 養生アドバイス（『わかる！選べる！漢方薬163』『漢方相談便利帖』の病態別養生より） =====
+const BYO = {
+ kikyo:{n:"気虚",tip:"冷たいもの・生もの・脂っこいもの・甘いものは控えめに。消化のよい温かい食事と十分な睡眠で、疲れをためないようにしましょう",shita:"色が淡く、ふちに歯のあと（歯痕）がある"},
+ kitai:{n:"気滞",tip:"香りのよい野菜（春菊・セロリ・ミツバ）や柑橘類がおすすめです。好きな音楽やお風呂でリラックスして、ストレスをためないように",shita:"舌の両わきが赤く、うすい黄色の苔"},
+ kekkyo:{n:"血虚",tip:"ナツメ・黒ごま・レバー・ほうれん草などで血を補いましょう。無理なダイエットや夜ふかしは控えめに",shita:"小さく細く、色が淡い。苔はうすく白い"},
+ oketsu:{n:"瘀血",tip:"青魚や玉ねぎ・にらがおすすめです。適度な運動と湯船で体を温めて、血のめぐりをよくしましょう",shita:"暗い紫色で黒い斑点。舌の裏の静脈が太い"},
+ inkyo:{n:"陰虚",tip:"トマト・梨・豆腐・れんこんなど潤す食材を。辛いものは控えて、夜は12時までに休みましょう",shita:"苔が少なく真っ赤。表面に裂け目"},
+ suitai:{n:"水滞",tip:"豆類・ハトムギ・とうもろこしなどを。甘いものや冷たい飲みもののとりすぎを控えて、軽い運動で汗をかきましょう",shita:"白くベトッとした厚い苔。ふちに歯のあと"},
+ jinkyo:{n:"腎虚",tip:"黒豆・山芋・黒ごまなど黒いもの・ねばりのあるものを。腰や足を冷やさないようにしましょう",shita:"色が淡く、湿りけが多い（ほてりタイプは赤く苔が少ない）"},
+ kan:{n:"寒証",tip:"ショウガ・ネギ・シナモンで体の中から温めましょう。冷たい飲食を控え、湯船につかるのがおすすめです",shita:"色が淡く白っぽい。白い苔で湿っている"},
+ netsu:{n:"熱証",tip:"辛いもの・お酒・脂っこいものは控えめに。きゅうりやトマトなど熱を冷ます食材がおすすめです",shita:"赤く、黄色い苔"},
+ hyo:{n:"表証（かぜ）",tip:"白湯で飲んで温かくして早めに休みましょう。じわっと汗をかいたら着替えて、冷えないように",shita:"うすい白い苔で、ほぼふつう"}
+};
+
+// ===== お客さんの事例 =====
+// q: hie=冷え・のぼせ ben=胃腸・便通 mizu=汗・むくみ・渇き nemuri=睡眠・ストレス tsukare=疲れ・気力 kusuri=持病・薬・妊娠
+// g:性別 m/f/k(子連れ) mie:見た目 byo:病態(養生・舌) best/ok/risk/red
+const QCATS=[["hie","冷え・のぼせは？"],["ben","胃腸・便通は？"],["mizu","汗・むくみ・渇きは？"],["nemuri","睡眠・ストレスは？"],["tsukare","疲れ・気力は？"],["kusuri","持病・薬・妊娠は？"],["shita","舌を見せてもらう"]];
+const NONE="特に気になることはないです";
+const CASES = [
+ // ---- かぜ・急性 ----
+ {nm:"会社員 ヤマダさん",g:"m",age:38,sea:[10,11,12,1,2,3],byo:"hyo",mie:"がっちり体型・声に張りがある",
+  say:"きのうから急に寒気がして、首から肩がガチガチなんです…",
+  q:{hie:"ゾクゾク寒気がする。熱は37.8℃",mizu:"汗はまったく出ていない",ben:"食欲はふつう。胃は丈夫",tsukare:"体力には自信がある"},
+  best:["kakkon"],ok:["mao"],ex:"寒気・無汗・首すじのこわばり＝太陽病実証の葛根湯。汗が出たら飲みすぎないよう伝えましょう。"},
+ {nm:"大学生 サトウくん",g:"m",age:21,sea:[12,1,2],byo:"hyo",mie:"運動部でがっしり",
+  say:"38.8℃の熱！ 体のふしぶしが痛くて、寒気がひどいです…",
+  q:{hie:"ガタガタ震えるほどの寒気",mizu:"汗はまったく出ない",tsukare:"だるい。病院の検査は陰性だった",ben:"食欲はあまりない"},
+  best:["mao"],ok:["kakkon"],ex:"高熱・強い悪寒・無汗・関節痛で体力充実＝麻黄湯。インフルエンザ様のかぜによく一致します。汗が出たら中止。"},
+ {nm:"事務員 スズキさん",g:"f",age:45,sea:[10,11,12,1,2,3],byo:"hyo",mie:"やせ型・声は小さめ",
+  say:"かぜっぽいんです。少しゾクッとして、頭が重くて…",
+  q:{hie:"軽い寒気。熱は37.2℃",mizu:"じわっと汗ばんでいる",tsukare:"昔から体力がないほう"},
+  best:["keishi"],ok:["hochu"],ex:"虚弱で自然に汗が出ている（自汗）かぜ初期＝太陽病虚証の桂枝湯。汗があるので麻黄剤は不向きです。"},
+ {nm:"元大工 ハラダさん",g:"m",age:79,old:1,sea:[11,12,1,2],byo:"kan",mie:"顔色が青白く、声に力がない",
+  say:"寒くて寒くて…布団をかぶっても寒気が止まらんのじゃ。",
+  q:{hie:"とにかく寒い。熱は37.3℃くらい",mizu:"冷たい水のような鼻水",tsukare:"だるくて横になっていたい",kusuri:"血圧の薬（利尿薬ではない）",shita:"白っぽく湿っている"},
+  best:["maobushi"],ok:["keishi"],ex:"高齢者の、熱感より寒気が強くだるいかぜ＝いきなり少陰病に入る『直中の少陰』。麻黄附子細辛湯で温めます。"},
+ {nm:"歌の先生 オオノさん",g:"f",age:42,sea:[10,11,12,1,2,3],byo:"netsu",mie:"のどを気にしている",
+  say:"のどが腫れて、つばを飲むのも痛いんです。",
+  q:{hie:"寒気はない。のどが熱っぽい",mizu:"少しのどが渇く",shita:"先が赤い"},
+  best:["kufu"],ok:["byakko"],ex:"のどの腫れと痛みが強いかぜ＝温病（熱のかぜ）。駆風解毒湯をお湯にとかし、うがいしながら飲むのがコツ。"},
+ {nm:"教師 コバヤシさん",g:"m",age:47,sea:[10,11,12,1,2,3],byo:"hyo",mie:"ふつうの体格",
+  say:"かぜをひいて1週間。微熱が続いて、胃もムカムカするんです。",
+  q:{hie:"寒気と熱っぽさが交互にくる。少し頭痛",ben:"食欲がない。吐き気。みぞおちがつかえる",mizu:"少し寝汗をかく",shita:"白い苔"},
+  best:["saikokei"],ok:["shosaiko"],ex:"長引いたかぜ・往来寒熱・胃腸症状＋少し表証が残る＝柴胡桂枝湯。同じかぜでも時期で処方が変わります（同病異治）。"},
+ {nm:"銀行員 モリタさん",g:"m",age:52,sea:[10,11,12,1,2,3],byo:"hyo",mie:"ふつうの体格",
+  say:"かぜがこじれて、熱が下がったり上がったり…口が苦いんです。",
+  q:{hie:"寒気と熱が交互。頭痛や寒気はもうない",ben:"食欲がなく、吐き気。便秘はない",mizu:"痰が黄色っぽい",kusuri:"特になし",shita:"白い苔がある"},
+  best:["shosaiko"],ok:["saikokei"],ex:"往来寒熱・口が苦い・食欲不振・胸脇苦満＝少陽病の代表、小柴胡湯。服用中の空咳・息切れには注意を伝えます。"},
+ {nm:"営業 ナカムラさん",g:"m",age:41,sea:[10,11,12,1,2,3],byo:"inkyo",mie:"咳きこむと顔が赤くなる",
+  say:"かぜは治ったのに、から咳だけが続いてて…",
+  q:{hie:"熱はない",mizu:"のどがカラカラ。痰は少なくて切れにくい",nemuri:"咳で目が覚める",shita:"赤く、苔が少ない"},
+  best:["bakumon"],ok:[],ex:"痰の少ない突き上げるから咳・のどの乾燥＝津液（うるおい）不足。麦門冬湯で潤しながら咳をしずめます。"},
+ {nm:"小学生の母 ミヤケさん",g:"f",age:36,sea:[10,11,12,1,2,3],byo:"netsu",mie:"本人は元気そう",
+  say:"かぜのあと、ゼーゼーする咳が止まらなくて。ねばい痰も出ます。",
+  q:{hie:"熱はないが体が熱っぽい",mizu:"咳きこむと汗が出る。のどが渇く",kusuri:"持病なし。ぜんそくの診断はない",shita:"赤く黄色い苔"},
+  best:["makyo"],ok:["saiboku"],ex:"激しい咳・汗ばむ・口渇＝肺の熱。麻杏甘石湯です。麻黄を含むので高齢者・心疾患には注意。"},
+ {nm:"保育士 イトウさん",g:"f",age:29,sea:[2,3,4,5],byo:"suitai",mie:"鼻をかみすぎて鼻が赤い",
+  say:"水みたいな鼻水とくしゃみが止まらないんです。花粉かも…",
+  q:{hie:"体が冷えやすい",mizu:"サラサラ透明な鼻水。うすい痰も",shita:"白く湿った苔"},
+  best:["shosei"],ok:["ryokan"],ex:"水様の鼻水・くしゃみ・冷え＝『寒』と『水滞』。小青竜湯がぴったりです。"},
+ {nm:"年金生活 ワタナベさん",g:"m",age:76,old:1,sea:[2,3,4,5,10,11],byo:"suitai",mie:"やせていて声に力がない",
+  say:"水っぽい鼻水とくしゃみでねえ。小青竜湯がいいと聞いたんじゃが。",
+  q:{hie:"冷えがつらい",mizu:"サラサラの鼻水・うすい痰",tsukare:"体力はない",kusuri:"狭心症の薬を飲んでいる。前立腺肥大でおしっこが出にくい"},
+  best:["ryokan"],ok:[],risk:{mao:1},ex:"証は小青竜湯でも、高齢・心臓病・排尿障害で麻黄はリスク大。麻黄を含まない苓甘姜味辛夏仁湯が正解。薬の確認が大事！"},
+ {nm:"タクシー運転手 イノさん",g:"m",age:49,byo:"netsu",mie:"鼻声",
+  say:"鼻がずっと詰まってて、黄色いドロッとした鼻水が…",
+  q:{hie:"顔のあたりが熱っぽい",mizu:"黄色くねばい鼻水。においがわかりにくい",kusuri:"耳鼻科で蓄膿症と言われた",shita:"赤く、黄色い苔"},
+  best:["shini"],ok:["kakkon"],ex:"黄色いねばい鼻水・強い鼻づまり＝鼻の熱証。辛夷清肺湯で冷まします。水っぽい鼻水の小青竜湯とは正反対。"},
+ // ---- 皮膚 ----
+ {nm:"高校生の母 タムラさん",g:"f",age:44,byo:"netsu",mie:"本人の相談",
+  say:"化膿しやすいニキビやじんましんがよく出るんです。",
+  q:{hie:"特になし",mizu:"分泌物はあまりない",ben:"ふつう",shita:"少し赤い"},
+  best:["jumi"],ok:["shofu"],ex:"化膿しやすい・根の浅い皮膚炎の初期＝十味敗毒湯。一時的に悪化（瞑眩）することがあると伝えておきましょう。"},
+ {nm:"調理師 カワイさん",g:"m",age:33,sea:[6,7,8,9],byo:"suitai",mie:"腕に湿疹",
+  say:"汗をかくと湿疹がジュクジュクして、かゆくてたまらない！",
+  q:{hie:"暑がり",mizu:"汁が出てジュクジュクする。梅雨から夏にひどい",ben:"ふつう",shita:"黄色くベトッとした苔"},
+  best:["shofu"],ok:["jumi"],ex:"かゆみ・分泌物が多い・汗や湿気で悪化＝湿熱の皮膚炎。消風散がぴったりです。"},
+ {nm:"事務員 オカモトさん",g:"f",age:38,sea:[10,11,12,1,2],byo:"kekkyo",mie:"肌がカサカサで赤い",
+  say:"冬になると肌がカサカサに乾燥して、赤くかゆくなるんです。",
+  q:{hie:"顔はのぼせやすい",mizu:"汁は出ない。とにかく乾燥",tsukare:"月経不順ぎみ",shita:"小さめで、先が赤い"},
+  best:["unsei"],ok:["shofu"],ex:"乾燥（血虚）＋赤み・熱＝温清飲（四物湯＋黄連解毒湯）。ジュクジュクなら消風散、カサカサなら温清飲。"},
+ // ---- 熱・のぼせ・高血圧傾向 ----
+ {nm:"居酒屋店主 ゴトウさん",g:"m",age:49,byo:"netsu",mie:"赤ら顔・声が大きい",
+  say:"顔がいつも赤くて、すぐカッカしちゃうんだよ。",
+  q:{hie:"暑がり。のぼせやすい",ben:"口が苦い。便はふつう",nemuri:"イライラ。寝つきが悪い",shita:"赤く黄色い苔"},
+  best:["oren"],ok:["saikoryu"],ex:"赤ら顔・のぼせ・イライラ・口が苦い＝体にこもった裏熱。黄連解毒湯で冷まします（便秘がなければこちら）。"},
+ {nm:"不動産業 ヒラタさん",g:"m",age:58,fat:1,byo:"netsu",mie:"赤ら顔で目が充血",
+  say:"のぼせがひどくて、最近鼻血も出た。便秘もガンコでね。",
+  q:{hie:"のぼせ・肩こり",ben:"3日出ないこともある頑固な便秘",nemuri:"イライラして眠れない",kusuri:"健診で血圧が高めと言われたが治療はしていない（上150）",shita:"赤く黄色い苔"},
+  best:["sanou"],ok:["oren"],ex:"のぼせ・出血傾向・頑固な便秘＝陽明病の裏熱。便秘があるので大黄入りの三黄瀉心湯。血圧は受診も合わせてすすめて。"},
+ {nm:"工事現場監督 ツジさん",g:"m",age:44,sea:[7,8],byo:"netsu",mie:"汗だく・日焼け",
+  say:"暑さにやられて…のどがカラカラで水をいくら飲んでも足りない！",
+  q:{hie:"体がほてって熱い",mizu:"大汗をかいて、ひどく口が渇く",ben:"ふつう",shita:"赤く乾いている"},
+  best:["byakko"],ok:["gorei"],ex:"大汗・ひどい口渇・ほてり＝陽明病の熱。白虎加人参湯で熱を冷まし潤します。尿が少なくむくむなら五苓散。"},
+ // ---- 瀉下 ----
+ {nm:"社長 モリさん",g:"m",age:55,fat:1,byo:"netsu",mie:"固太りでおなかがパンパン",
+  say:"健康診断でおなかまわりを注意されてね。便秘もあるんだ。",
+  q:{hie:"暑がり",mizu:"汗っかき",ben:"便秘がち。胃は丈夫",tsukare:"元気いっぱい"},
+  best:["bofu"],ok:["daisaiko"],ex:"実証・暑がり・便秘・腹部の皮下脂肪＝防風通聖散。実証の人向けで、胃腸の弱い人に売ると下痢で体力を消耗します。"},
+ {nm:"建設会社役員 オオタさん",g:"m",age:52,fat:1,byo:"kitai",mie:"がっしり体型・肩が盛り上がっている",
+  say:"脇腹からみぞおちが張って苦しいんだ。肩こりもひどい。",
+  q:{ben:"便秘ぎみ。みぞおちを押すと痛い",nemuri:"仕事のストレスが多い",tsukare:"体力はある",shita:"黄色い苔"},
+  best:["daisaiko"],ok:["bofu"],ex:"がっしり体型・強い胸脇苦満・便秘＝少陽病実証の大柴胡湯。"},
+ {nm:"華道の先生 サカモトさん",g:"f",age:80,old:1,byo:"inkyo",mie:"小柄で肌が乾燥",
+  say:"便が出にくくてねえ。出てもコロコロなのよ。",
+  q:{ben:"ウサギのようなコロコロ便。3日に1回",mizu:"肌やのどが乾燥しやすい",shita:"苔が少ない"},
+  best:["mashinin"],ok:[],ex:"高齢者の兎糞状の便＝腸の潤い不足。麻子仁丸で潤しながら出します。"},
+ {nm:"トラック運転手 キタムラさん",g:"m",age:46,byo:"oketsu",mie:"座り仕事が長い",
+  say:"いぼ痔が痛くて…便が硬いと出血もするんです。",
+  q:{ben:"便秘ぎみで硬い便。排便時に出血",hie:"特になし",kusuri:"特になし",shita:"少し暗い色"},
+  best:["otsuji"],ok:["mashinin"],ex:"便秘をともなう痔・排便時の出血＝乙字湯。大黄で便をやわらかくし、升麻・柴胡で持ち上げます。"},
+ // ---- 温補 ----
+ {nm:"手芸教室 ナガイさん",g:"f",age:72,old:1,byo:"kan",mie:"顔色が青白く、声に力がない",
+  say:"朝方になると水のような下痢をするの。フラッとするめまいもあって…",
+  q:{hie:"手足もおなかも冷える",ben:"水様の下痢。腹痛はあまりない",mizu:"足がむくむ。夜中にトイレに起きる",tsukare:"体力がない",shita:"白っぽくぽってりしている"},
+  best:["shinbu"],ok:["ninjin"],ex:"強い冷え・体力低下・水様下痢・めまい＝少陰病＋水毒の真武湯。附子で温めながら水をさばきます。"},
+ {nm:"漁師 ナカガワさん",g:"m",age:63,byo:"kan",mie:"日焼けしているが腰をさすっている",
+  say:"腰から下が水につかったみたいに冷えて、重だるいんだ。",
+  q:{hie:"腰から下が冷たい。上半身は冷えない",mizu:"うすい尿がたくさん出る。夜もトイレ",ben:"胃腸は丈夫",shita:"白く湿った苔"},
+  best:["ryokyo"],ok:["hachimi"],ex:"下半身が水につかったような冷えと重だるさ＝苓姜朮甘湯。『腰に冷たいおもり』が目標です。"},
+ {nm:"図書館司書 ナカタさん",g:"f",age:48,byo:"kekkyo",mie:"やせていて顔色が悪い",
+  say:"かぜをひきやすくて、ひくと長引くんです。背中がゾクゾクして…",
+  q:{hie:"背中がゾクゾク。首から上だけ汗",mizu:"口が渇く",nemuri:"動悸がして眠りが浅い。神経が過敏",tsukare:"とても疲れやすい。息切れ"},
+  best:["saikokan"],ok:["saikokei"],ex:"虚弱・背中のゾクゾク・頭汗・動悸＝少陽病でいちばん虚証の柴胡桂枝乾姜湯。"},
+ {nm:"美容師 エンドウさん",g:"f",age:35,byo:"kan",mie:"やせ型",
+  say:"月に何回か、吐き気をともなう頭痛がくるんです。",
+  q:{hie:"手足がとても冷える",ben:"頭痛のときは吐き気・嘔吐",kusuri:"頭痛薬を飲んでもあまり効かない",shita:"白っぽい"},
+  best:["goshuyu"],ok:["gorei"],ex:"冷え＋吐き気をともなう頭痛＝呉茱萸湯。むくみ・口渇があれば五苓散も候補。"},
+ // ---- 気剤 ----
+ {nm:"銀行員 キムラさん",g:"f",age:39,byo:"kitai",mie:"不安そうな表情",
+  say:"のどに何か詰まった感じがして…。耳鼻科では異常なしと言われました。",
+  q:{ben:"ときどきおなかが張る",nemuri:"不安になりやすく、気分がふさぐ",shita:"両わきが赤い"},
+  best:["hange"],ok:["saiboku"],ex:"検査で異常のない、のどのつかえ感（梅核気）＝『気滞』。半夏厚朴湯で気のめぐりを。"},
+ {nm:"新人OL ウエダさん",g:"f",age:23,byo:"suitai",mie:"色白でほっそり",
+  say:"立ち上がるとクラッとして…。頭も重いんです。",
+  q:{hie:"のぼせぎみ",ben:"みぞおちでチャポチャポ音がする",mizu:"尿が少なめ",nemuri:"ドキドキすることがある",shita:"歯のあとがある"},
+  best:["ryokei"],ok:["gorei"],ex:"立ちくらみ・ふらつき・動悸・胃内停水＝気の上衝と水毒の苓桂朮甘湯。"},
+ {nm:"パート ヨコヤマさん",g:"f",age:41,byo:"kitai",mie:"目がうるんでいる",
+  say:"最近すぐ泣けてきて…自分でも気持ちがコントロールできないんです。",
+  q:{nemuri:"夜は眠れない。あくびばかり出る",tsukare:"疲れている",kusuri:"特になし。甘草入りの薬も飲んでいない",shita:"淡い色"},
+  best:["kanbaku"],ok:["kami"],ex:"情緒不安定・泣きやすい・あくび＝甘麦大棗湯。甘草が多いので他の甘草製剤との重複に注意。"},
+ {nm:"係長 ヤスダさん",g:"m",age:45,byo:"kitai",mie:"がっしりしているが落ち着かない",
+  say:"動悸がして、ちょっとしたことでビクッとするんです。夜も眠れない。",
+  q:{nemuri:"不安・イライラ・驚きやすい。寝つけない",ben:"便秘ぎみ。脇腹が張る",tsukare:"体力はある",shita:"黄色い苔"},
+  best:["saikoryu"],ok:["keiryu"],ex:"体力あり・動悸・不安・驚きやすい・胸脇苦満＝柴胡加竜骨牡蛎湯。虚弱なら桂枝加竜骨牡蛎湯と使い分けます。"},
+ {nm:"大学院生 シノダさん",g:"m",age:26,byo:"kikyo",mie:"やせて青白い",
+  say:"論文で神経がすり減って…眠りが浅くて変な夢ばかり見るんです。",
+  q:{nemuri:"眠りが浅く夢が多い。動悸",mizu:"寝汗をかく",tsukare:"精神的に疲れきっている。体力もない",shita:"淡い色"},
+  best:["keiryu"],ok:["sanso","kamikihi"],ex:"体力がなく神経過敏・夢が多い・寝汗＝桂枝加竜骨牡蛎湯。柴胡加竜骨牡蛎湯の虚証版です。"},
+ {nm:"元市役所 スギモトさん",g:"m",age:67,old:1,byo:"kitai",mie:"首や肩をよくさすっている",
+  say:"朝起きると頭が重くて痛いんです。肩もこるし、めまいも。",
+  q:{hie:"のぼせぎみ",nemuri:"寝起きがつらい",kusuri:"朝の血圧が高めと言われている（治療中）",shita:"ふつう〜やや赤い"},
+  best:["choto"],ok:["goshuyu"],ex:"中高年の朝方の頭痛・頭重・めまい・肩こり＝釣藤散。血圧の治療は続けてもらいましょう。"},
+ {nm:"会社員 ヤマグチさん",g:"m",age:48,byo:"kitai",mie:"眉間にしわ",
+  say:"最近すぐカッとなって。夜は歯ぎしりがひどいと家族に言われます。",
+  q:{nemuri:"怒りっぽい。眠りが浅い。まぶたがピクピクする",shita:"両わきが赤い"},
+  best:["yokkan"],ok:["kami"],ex:"イライラ・歯ぎしり・筋のぴくつき＝『肝』の高ぶり。抑肝散で神経の興奮をしずめます。"},
+ {nm:"2歳児のママ ハヤカワさん",g:"k",age:31,byo:"kitai",mie:"子どもを抱っこしている",
+  say:"この子の夜泣きとかんしゃくがひどくて…私も寝不足です。",
+  q:{nemuri:"子どもは夜中に何度も泣いて怒る。興奮しやすい",ben:"子どもの食欲・便はふつう",kusuri:"子どもに持病はない",shita:"子どもの舌はふつう"},
+  best:["yokkan"],ok:["kanbaku"],ex:"子どもの夜泣き・かんの虫・興奮＝抑肝散。『母子同服』といって、お母さんも一緒に飲むことがある処方です。"},
+ {nm:"研究者 オカダさん",g:"m",age:46,byo:"kekkyo",mie:"疲れた顔",
+  say:"毎日くたくたなのに、布団に入ると眠れないんです。",
+  q:{nemuri:"寝つきが悪く、眠りが浅い。イライラはあまりない",tsukare:"疲れがたまっている",shita:"淡い色"},
+  best:["sanso"],ok:["kamikihi"],ex:"心身疲労による不眠＝酸棗仁湯。イライラが強ければ抑肝散、と区別しましょう。"},
+ // ---- 血剤 ----
+ {nm:"看護師 ハヤシさん",g:"f",age:28,byo:"kekkyo",mie:"色白で華奢",
+  say:"冷え性で、生理痛がつらいんです。",
+  q:{hie:"手足がとても冷える",mizu:"夕方は足がむくむ。立ちくらみも",tsukare:"疲れやすい",shita:"淡く、歯のあと"},
+  best:["toki"],ok:["keibuku"],ex:"色白・冷え・むくみ・月経痛＝『血虚＋水滞』の虚証。当帰芍薬散です。"},
+ {nm:"自営業 シミズさん",g:"f",age:43,byo:"oketsu",mie:"がっちり・肌がくすんでいる",
+  say:"生理痛がひどくて、肩こりとのぼせもあるんです。",
+  q:{hie:"顔はのぼせるが足先が冷える",tsukare:"体力はある",kusuri:"特になし。経血に塊がまじる",shita:"暗い紫色で斑点"},
+  best:["keibuku"],ok:["tokaku"],ex:"体力あり・のぼせ足冷え・経血の塊＝『瘀血』。桂枝茯苓丸で血のめぐりを改善します。"},
+ {nm:"エステ経営 マエダさん",g:"f",age:37,byo:"oketsu",mie:"あごにふきでもの",
+  say:"生理前はイライラがひどくて、便秘もガンコなんです。",
+  q:{hie:"のぼせがひどい",ben:"頑固な便秘",nemuri:"生理前は爆発しそうなほどイライラ",kusuri:"特になし。経血は赤黒い",shita:"暗い紫で黄色い苔"},
+  best:["tokaku"],ok:["keibuku"],ex:"強いのぼせ・イライラ・頑固な便秘・赤黒い経血＝瘀血＋熱の桃核承気湯。便秘がなければ桂枝茯苓丸。"},
+ {nm:"主婦 ヤマモトさん",g:"f",age:51,byo:"kitai",mie:"やや細め",
+  say:"急にカーッと熱くなって汗が出たり、イライラしたり…。",
+  q:{hie:"上半身はほてるが足は冷える",mizu:"顔にだけ急に汗をかく",nemuri:"イライラ・不安。日によって症状が変わる",ben:"便秘ぎみ"},
+  best:["kami"],ok:["keibuku"],ex:"更年期のほてり・イライラ・不定愁訴＝加味逍遙散。症状がコロコロ変わる人に。"},
+ {nm:"手術を終えた フジタさん",g:"f",age:62,byo:"kekkyo",mie:"顔色が悪く、体重が減った",
+  say:"手術のあと、なかなか体力が戻らなくて。",
+  q:{hie:"寒がりになった",ben:"食欲は少しずつ戻ってきた",mizu:"寝汗をかく",tsukare:"気力がわかない",kusuri:"主治医からは漢方を使ってもよいと言われた。貧血ぎみ"},
+  best:["juzen"],ok:["hochu"],ex:"術後の体力低下・顔色不良・貧血傾向＝『気血両虚』の十全大補湯。"},
+ {nm:"介護職 イワサキさん",g:"f",age:54,byo:"kekkyo",mie:"疲れきった表情",
+  say:"くよくよ考えて眠れなくて…物忘れも増えました。",
+  q:{nemuri:"疲れているのに眠れない。考えごとがとまらない",tsukare:"くたくた。気力がない",mizu:"ときどき微熱",kusuri:"貧血と言われたことがある",shita:"淡い色"},
+  best:["kamikihi"],ok:["sanso"],ex:"心身の疲労・考えすぎの不眠・物忘れ・貧血＝加味帰脾湯。"},
+ {nm:"事務員 クボさん",g:"f",age:40,byo:"kekkyo",mie:"顔色が青白い",
+  say:"生理の量が多くて、だらだら長く続くんです。",
+  q:{hie:"冷え性",tsukare:"貧血ぎみでだるい",kusuri:"婦人科で検査して、大きな病気はないと言われた",shita:"淡い色"},
+  best:["kyuki"],ok:["toki"],ex:"過多月経・長引く出血に貧血・冷え＝止血作用のある芎帰膠艾湯。検査済みかどうかの確認も大切です。"},
+ // ---- 利水 ----
+ {nm:"デザイナー カトウさん",g:"f",age:34,sea:[5,6,7,9],byo:"suitai",mie:"顔がややむくんでいる",
+  say:"雨が降る前になると頭が痛くなるんです。",
+  q:{mizu:"のどが渇くのに尿が少ない。顔や足がむくむ",ben:"ときどき軟便",kusuri:"頭痛薬をよく飲む",shita:"白く厚い苔"},
+  best:["gorei"],ok:["goshuyu"],ex:"口渇・尿不利・むくみ＋天気頭痛＝『水滞』。五苓散で水のかたよりを整えます。"},
+ {nm:"建設業 ヨシダさん",g:"m",age:50,sea:[7,8,9],byo:"suitai",mie:"日焼け・体力がありそう",
+  say:"暑さで冷たい水をがぶ飲みしたら、下痢と吐き気が…。",
+  q:{mizu:"のどが渇いて水を飲むが、すぐ吐く。尿が少ない",ben:"水のような下痢",shita:"白い苔"},
+  best:["gorei"],ok:["sairei"],ex:"口渇＋水を飲むと吐く（水逆）＋水様便＝五苓散の典型。脱水がひどければ受診を。"},
+ {nm:"塾講師 マツイさん",g:"m",age:35,sea:[6,7,8,9],byo:"suitai",mie:"だるそう",
+  say:"夏かぜで下痢と吐き気…微熱もあって、食欲もないです。",
+  q:{hie:"微熱。寒気と熱が交互",ben:"水っぽい下痢と吐き気。食欲なし",mizu:"口が渇く。尿が少ない",shita:"白い苔"},
+  best:["sairei"],ok:["gorei"],ex:"微熱・往来寒熱・吐き気（小柴胡湯）＋口渇・尿不利・下痢（五苓散）＝柴苓湯。"},
+ {nm:"OL ハセガワさん",g:"f",age:31,byo:"netsu",mie:"トイレを気にしている",
+  say:"トイレのとき、しみるように痛くて…残尿感もあります。",
+  q:{hie:"熱はない",mizu:"トイレが近い。尿の色が濃い。口が渇く",kusuri:"特になし。腰や背中の痛みもない",shita:"赤い"},
+  best:["chorei"],ok:["gorin"],ex:"排尿痛・残尿感・頻尿（発熱・背部痛なし）＝猪苓湯。熱や背部痛があれば受診を。"},
+ {nm:"パート コンドウさん",g:"f",age:56,byo:"netsu",mie:"ふつうの体格",
+  say:"膀胱炎を年に何回もくり返すんです。今も少し残尿感が…。",
+  q:{hie:"特になし",mizu:"残尿感・軽い排尿痛。尿がにごることも",tsukare:"疲れると出やすい",kusuri:"病院の抗菌薬で毎回治るが、またなる",shita:"黄色い苔"},
+  best:["gorin"],ok:["chorei","seishin"],ex:"くり返す軽めの膀胱炎＝五淋散。強い炎症なら猪苓湯、胃腸虚弱・冷えがあれば清心蓮子飲。"},
+ // ---- 健胃・整腸 ----
+ {nm:"営業課長 イマイさん",g:"m",age:44,byo:"kitai",mie:"胃のあたりをさすっている",
+  say:"ストレスがたまるとおなかがゴロゴロ鳴って下痢するんです。",
+  q:{ben:"みぞおちがつかえる。おなかがゴロゴロ。下痢と便秘をくり返す",nemuri:"仕事のストレス大",mizu:"口内炎ができやすい",shita:"白い苔"},
+  best:["hangesha"],ok:["heii"],ex:"心下痞（みぞおちのつかえ）・腹鳴・しぶり腹＝半夏瀉心湯。口内炎にも使われます。"},
+ {nm:"妊娠10週 アライさん",g:"f",age:30,byo:"suitai",mie:"青白い顔",
+  say:"つわりで、胃がムカムカ込みあげてくるんです…。",
+  q:{ben:"胃が張ってチャポチャポ。吐き気が突き上げる",mizu:"つばがたまる",kusuri:"妊娠10週。産婦人科には通っている",shita:"白く湿った苔"},
+  best:["bukuryo"],ok:["rikkun"],risk:{ninpu:1},ex:"胃内停水と突き上げる吐き気＝茯苓飲。つわりにも使われます。水分がとれないほどなら受診を。"},
+ {nm:"新社会人 オダさん",g:"m",age:24,sea:[4,12,1],byo:"suitai",mie:"元気そう",
+  say:"歓迎会で食べすぎて、胃がもたれておなかが張って…。",
+  q:{ben:"胃もたれ・おなかの張り・ガス。ふだんは胃腸は丈夫",tsukare:"元気",shita:"白く厚い苔"},
+  best:["heii"],ok:["hangesha"],ex:"食べすぎ・飲みすぎの胃もたれ・張り＝平胃散。もともと胃腸が弱い人なら六君子湯。"},
+ {nm:"学生 ニシムラさん",g:"f",age:22,sea:[11,12,1,2],byo:"kan",mie:"やせ型",
+  say:"冷たいものを食べると胃がキリキリ痛むんです。",
+  q:{hie:"冷え性",ben:"胃痛と胸やけ。便の色はふつう",shita:"白っぽい"},
+  best:["anchu"],ok:["ninjin"],ex:"やせ型・冷えによる胃痛＝安中散。黒い便や強い痛みが続くなら受診勧奨を。"},
+ // ---- 補益強壮 ----
+ {nm:"郵便局員 タナベさん",g:"m",age:59,byo:"kan",mie:"顔色が悪く、つばが多い",
+  say:"冷たいものを食べるとすぐおなかをこわすんです。",
+  q:{hie:"おなかが冷える",ben:"下痢・腹痛・食欲不振",mizu:"口は渇かない。うすいつばがたまる",tsukare:"疲れやすい",shita:"淡く白い苔"},
+  best:["ninjin"],ok:["shinbu","anchu"],ex:"胃腸の冷えと虚弱・口が渇かない＝太陰病の人参湯。"},
+ {nm:"パート イノウエさん",g:"f",age:44,byo:"kikyo",mie:"やせ型",
+  say:"胃がもたれて、少ししか食べられないんです。",
+  q:{hie:"手足が冷える",ben:"胃もたれ・食欲不振。軟便ぎみ",mizu:"みぞおちを叩くとチャポチャポ",tsukare:"疲れやすい",shita:"淡く歯のあと"},
+  best:["rikkun"],ok:["hochu"],ex:"胃腸虚弱・胃内停水＝『気虚＋水滞』。六君子湯が胃の働きを助けます。"},
+ {nm:"SE マツモトさん",g:"m",age:36,byo:"kikyo",mie:"やせ型・声に力がない",
+  say:"とにかく疲れやすくて…。昼ごはんのあと眠くてたまりません。",
+  q:{hie:"やや寒がり",mizu:"寝汗をかく",ben:"食欲がなく、すぐ満腹",tsukare:"やる気が出ない",shita:"淡く歯のあと"},
+  best:["hochu"],ok:["juzen","rikkun"],ex:"疲れ・食後の眠気・声に力がない・寝汗＝『気虚』。補中益気湯です。"},
+ {nm:"小1の母 オオシマさん",g:"k",age:34,byo:"kikyo",mie:"やせた男の子を連れている",
+  say:"この子、よくおなかが痛いって言うんです。疲れやすくて…",
+  q:{ben:"子どもはおなかをよく痛がる。食が細い",mizu:"子どもは寝汗をかく。おねしょも",tsukare:"子どもは疲れやすく顔色が悪い",kusuri:"小児科では異常なし"},
+  best:["shoken"],ok:["rikkun"],ex:"虚弱児の腹痛・疲れやすい・寝汗・夜尿＝小建中湯。甘くて子どもも飲みやすい処方です。"},
+ {nm:"定年後 アキヤマさん",g:"m",age:68,old:1,byo:"kan",mie:"おなかをさすっている",
+  say:"おなかが冷えて張って、ガスがたまって痛むんです。",
+  q:{hie:"おなかも手足も冷える",ben:"ガス・張り。腸がグルグル動くのがわかる",tsukare:"体力は落ちた",kusuri:"数年前に腸の手術",shita:"白っぽい"},
+  best:["daiken"],ok:["ninjin"],ex:"腹部の冷え・張り・ガス・腸の蠕動痛＝大建中湯。腹部術後の腸の動きにも使われます。"},
+ {nm:"農家 オガワさん",g:"m",age:74,old:1,byo:"jinkyo",mie:"年相応・足腰が弱い",
+  say:"夜中に何度もトイレに起きて、腰も痛くてなあ。",
+  q:{hie:"腰から下が冷える",mizu:"口が渇く。夜間頻尿",ben:"食欲は旺盛",shita:"淡く湿っている"},
+  best:["hachimi"],ok:["goshajin"],ex:"高齢・夜間頻尿・腰痛・下半身の冷え＝『腎虚』の八味地黄丸。胃腸が丈夫なので地黄も大丈夫。"},
+ {nm:"元校長 イシイさん",g:"m",age:78,old:1,byo:"jinkyo",mie:"やせ型・足腰が弱っている",
+  say:"夜中に足がつって目が覚めるんじゃ。芍薬甘草湯というのがいいらしいが。",
+  q:{hie:"腰から下が冷える",mizu:"夜中に3回はトイレ。足がむくみやすい",ben:"胃腸は丈夫",kusuri:"高血圧で利尿薬を飲んでいる"},
+  best:["hachimi","goshajin"],ok:[],risk:{kan:1},ex:"利尿薬＋甘草は低カリウム・偽アルドステロン症の危険。『腎虚』なので甘草を含まない八味地黄丸・牛車腎気丸が安全です。"},
+ {nm:"元教員 カネコさん",g:"f",age:70,old:1,byo:"jinkyo",mie:"足をひきずっている",
+  say:"足のしびれと痛みがひどくて…むくみもあるの。",
+  q:{hie:"足腰が冷える",mizu:"足がむくむ。夜間頻尿",ben:"胃腸は丈夫",kusuri:"糖尿病で治療中（主治医了承）",shita:"淡い色"},
+  best:["goshajin"],ok:["hachimi"],ex:"八味地黄丸の症状＋足のしびれ・痛み・むくみが強い＝牛車腎気丸。"},
+ {nm:"中学生の父 サイトウさん",g:"m",age:50,byo:"inkyo",mie:"やせ型",
+  say:"足腰がだるくて、手足がほてって寝苦しいんです。",
+  q:{hie:"冷えはない。むしろ手足がほてる",mizu:"口が渇く。寝汗",nemuri:"ほてって寝苦しい",shita:"赤く苔が少ない"},
+  best:["rokumi"],ok:["hachimi"],ex:"腎虚でも冷えがなく、ほてり・口渇・寝汗＝六味丸。冷えがあれば八味地黄丸。"},
+ {nm:"書道家 モチヅキさん",g:"m",age:66,old:1,byo:"kikyo",mie:"胃腸が弱そう・神経質",
+  say:"残尿感があって、トイレが近いんです。前立腺の検査は異常なし。",
+  q:{hie:"冷え性",ben:"胃腸が弱い",mizu:"残尿感・頻尿・尿のにごり",nemuri:"イライラして眠れないことも",shita:"淡く先が赤い"},
+  best:["seishin"],ok:["gorin"],ex:"胃腸虚弱・冷え・イライラ＋排尿トラブル＝清心蓮子飲。"},
+ // ---- 鎮咳 ----
+ {nm:"会社員 ホンダさん",g:"f",age:37,byo:"kitai",mie:"緊張しやすそう",
+  say:"ぜんそくがあって…ストレスがたまると胸が苦しくなるんです。",
+  q:{mizu:"痰がからむ咳",nemuri:"不安になると息苦しい",ben:"ときどき胃が不快",kusuri:"ぜんそくの吸入薬を使っている。今は落ち着いている",shita:"白い苔"},
+  best:["saiboku"],ok:["hange"],ex:"不安で悪化する胸苦しさ・痰のからむ咳＝柴朴湯（小柴胡湯＋半夏厚朴湯）。発作時ではなく寛解期の体質改善に。"},
+ // ---- 筋肉・関節 ----
+ {nm:"サッカー少年の父 マツダさん",g:"m",age:40,sea:[5,6,7,8,9],byo:"hyo",mie:"日焼けして元気",
+  say:"試合中によく足がつるんです。つったときにすぐ飲めるものを。",
+  q:{mizu:"汗はたくさんかく",tsukare:"体力はある",kusuri:"特になし。血圧も正常"},
+  best:["shakukan"],ok:[],ex:"急なこむら返りの頓服＝芍薬甘草湯。甘草が多いので『つったときだけ』の頓用で。"},
+ {nm:"郵便配達 ワダさん",g:"m",age:45,sea:[5,6,9,10],byo:"suitai",mie:"ひざをさすっている",
+  say:"雨の日や梅雨になると、ひざや腰が重だるく痛むんです。",
+  q:{mizu:"夕方は足がむくむ",hie:"特に冷えはない",ben:"胃腸は丈夫",shita:"白く厚い苔"},
+  best:["mayoku"],ok:["boi"],ex:"湿気・低気圧で悪化する関節の重だるい痛み＝湿邪の痺証。麻杏薏甘湯です。"},
+ {nm:"元事務員 ハマダさん",g:"f",age:69,old:1,byo:"kan",mie:"手首をさすっている",
+  say:"冷えると手足の関節がズキズキ痛んで、しびれるんです。",
+  q:{hie:"冷え性。冷えると痛みが増す",mizu:"汗は少なめ",tsukare:"体力はない",shita:"白っぽい"},
+  best:["keijutsu"],ok:["goshaku"],ex:"冷えと湿気で悪化する関節痛・しびれ＝桂枝加朮附湯。附子で温めます。"},
+ {nm:"事務員 タカギさん",g:"f",age:52,byo:"kan",mie:"腰に手をあてている",
+  say:"冷房にあたると腰が痛くなって、おなかも痛むんです。",
+  q:{hie:"上半身は熱いのに下半身が冷える",ben:"下腹部が痛む",tsukare:"慢性的な腰痛",shita:"白く湿った苔"},
+  best:["goshaku"],ok:["ryokyo"],ex:"冷房・冷えで悪化する慢性の腰痛・下腹部痛、上熱下寒＝五積散。"},
+ {nm:"主婦 アベさん",g:"f",age:58,fat:1,byo:"suitai",mie:"色白でぽっちゃり",
+  say:"ひざが痛くて…。体重もなかなか落ちないんです。",
+  q:{mizu:"汗をかきやすい。夕方は足がむくむ",tsukare:"筋肉が少なく疲れやすい",shita:"淡く歯のあと"},
+  best:["boi"],ok:["mayoku"],ex:"色白・水太り・汗かき・ひざ痛＝防已黄耆湯。防風通聖散（実証向け）とは正反対です。"},
+ {nm:"元運送業 ササキさん",g:"m",age:64,byo:"oketsu",mie:"足をかばって歩く",
+  say:"腰から足にかけて痛くてしびれて…夜中や明け方がひどいんだ。",
+  q:{hie:"特になし",nemuri:"痛みで目が覚める",kusuri:"整形外科で坐骨神経痛と言われた",shita:"暗い紫色"},
+  best:["sokei"],ok:["goshajin"],ex:"腰〜足の痛み・しびれ、夜間悪化＝瘀血をともなう痺証の疎経活血湯。"},
+ // ---- 妊娠・安全確認 ----
+ {nm:"妊娠5か月 ミウラさん",g:"f",age:32,sea:[10,11,12,1,2,3],byo:"hyo",mie:"おなかが少し大きい",
+  say:"かぜのひきはじめで…葛根湯をください。",
+  q:{hie:"少し寒気",mizu:"じわっと汗ばんでいる",tsukare:"疲れやすい",kusuri:"妊娠5か月です"},
+  best:["keishi"],ok:["hochu"],risk:{ninpu:1},ex:"妊娠中のかぜに麻黄剤は避けたい。汗ばむ虚証なので桂枝湯のようなマイルドな処方を。"},
+ {nm:"妊娠7か月 タケダさん",g:"f",age:29,byo:"kekkyo",mie:"色白・おなかが大きい",
+  say:"足がむくんで冷えるんです。妊娠中でも飲める漢方はありますか？",
+  q:{hie:"手足が冷える",mizu:"足のむくみ",tsukare:"疲れやすい",kusuri:"妊娠7か月。経過は順調"},
+  best:["toki"],ok:[],risk:{ninpu:1},ex:"妊娠中でもすすめられる当帰芍薬散。桂枝茯苓丸など駆瘀血剤は妊娠中は避けます。"},
+ {nm:"社長 クロダさん",g:"m",age:58,fat:1,byo:"netsu",mie:"赤ら顔",
+  say:"やせたいんだ。防風通聖散ってのがいいんだろう？",
+  q:{hie:"暑がり",ben:"便秘がち",kusuri:"不整脈と心臓病で治療中。動悸が出やすい"},
+  best:["daisaiko"],ok:["sanou"],risk:{mao:1},ex:"実証の肥満でも、心臓病・動悸があるので麻黄入りの防風通聖散はリスク。麻黄を含まない大柴胡湯なら使いやすい。"},
+ // ---- 受診勧奨 ----
+ {nm:"会社役員 ハシモトさん",g:"m",age:63,fat:1,red:1,byo:"netsu",mie:"顔面蒼白・脂汗",
+  say:"さっきから胸が締めつけられるように痛くて…。漢方で何かないかね。",
+  q:{hie:"冷や汗が出ている",ben:"少し吐き気",nemuri:"左肩から腕まで痛む気がする",kusuri:"高血圧と糖尿病の薬"},
+  ex:"冷や汗をともなう胸の締めつけ・左腕への痛み＝心筋梗塞の疑い！ ただちに救急受診を。"},
+ {nm:"会社員 イケダさん",g:"m",age:57,red:1,byo:"kikyo",mie:"顔色が悪い",
+  say:"胃が痛くて、なんだかフラフラするんです。胃薬の漢方を。",
+  q:{ben:"数日前から便が真っ黒",tsukare:"立ちくらみがする",kusuri:"腰痛で痛み止め（NSAIDs）を毎日飲んでいる"},
+  ex:"黒色便＋ふらつき＋NSAIDs常用＝消化管出血の疑い。すぐ受診をすすめましょう。"},
+ {nm:"お母さん ササキさん",g:"k",age:33,sea:[12,1,2,7,8],red:1,byo:"hyo",mie:"赤ちゃんがぐったりしている",
+  say:"1歳の子が高熱でぐったりしていて。漢方で何かありますか？",
+  q:{hie:"40℃近い熱",mizu:"水分をほとんどとれていない。おしっこが半日出ていない",ben:"何度も吐いている",nemuri:"呼びかけへの反応がにぶい"},
+  ex:"乳児の高熱・ぐったり・脱水（尿が出ない）＝危険なサイン。すぐに受診を。"},
+ {nm:"主婦 ヤマザキさん",g:"f",age:66,old:1,red:1,byo:"suitai",mie:"足がパンパン",
+  say:"最近足がむくんで、力が入らないの。血圧も上がってきて…。",
+  q:{tsukare:"手足に力が入らない",mizu:"足がパンパンにむくむ",ben:"甘草入りの胃薬を毎日飲んでいる",kusuri:"よその病院で芍薬甘草湯を毎日処方されている"},
+  ex:"甘草の重複＋むくみ・血圧上昇・脱力＝偽アルドステロン症の疑い。追加販売せず、受診をすすめましょう。"},
+ {nm:"運送業 ムラカミさん",g:"m",age:45,red:1,byo:"netsu",mie:"つらそう",
+  say:"おしっこのとき痛くて。猪苓湯ってのがいいんだろ？",
+  q:{hie:"38.5℃の熱と寒気",mizu:"尿に血がまじる",kusuri:"特になし。腰の片側を叩くとひびく"},
+  ex:"排尿痛に加え、発熱・血尿・腰背部痛＝腎盂腎炎などの疑い。受診勧奨が正解です。"},
+ {nm:"工場長 オノデラさん",g:"m",age:54,fat:1,red:1,byo:"netsu",mie:"顔が真っ赤",
+  say:"血圧を下げる漢方をくれ。さっき測ったら上が250、下が140だった。",
+  q:{hie:"頭がガンガンする",kusuri:"血圧の薬は自己判断でやめた",nemuri:"イライラ"},
+  ex:"上250／下140は危険域。漢方はすぐに血圧を下げる薬ではありません。その場で受診をすすめるのが正解です。"},
+ {nm:"常連 フクダさん",g:"f",age:48,red:1,byo:"kikyo",mie:"以前よりやせた",
+  say:"疲れが取れなくて…補中益気湯も十全大補湯も試したのに、まったく変わらないの。",
+  q:{tsukare:"数か月、何を飲んでも手ごたえがない",ben:"体重が理由もなく減っている",kusuri:"健康診断は数年受けていない"},
+  ex:"合っているはずの漢方が数か月効かず体重減少＝隠れた病気の可能性。精密検査のために受診をすすめましょう。"},
+ {nm:"常連 ナカノさん",g:"m",age:61,red:1,byo:"hyo",mie:"息苦しそう",
+  say:"肝臓のために小柴胡湯を飲んでるんだが、最近から咳と息切れがして熱っぽい。",
+  q:{hie:"37.8℃の熱",mizu:"痰のない空咳",tsukare:"階段で息切れ",kusuri:"小柴胡湯を長く飲んでいる"},
+  ex:"小柴胡湯服用中の空咳・息切れ・発熱＝間質性肺炎の初期症状の可能性。服用を中止し、すぐ受診を。"}
+];
+
+// 経過確認イベント（『漢方相談便利帖』こんな時どうする？より）
+const FOLLOW = [
+ {id:"imotare",cond:r=>["juzen","toki","hachimi","rokumi","goshajin","unsei","kyuki","shofu"].includes(r.f),
+  say:"飲みはじめてから、胃がもたれるんです…",
+  ch:[["食後の服用や量を半分に減らすことを提案し、様子を見てもらう",2,"◎ 当帰・地黄は胃にさわることがある。食後服用や減量で調整を。"],
+      ["効いている証拠なので、がまんして続けてもらう",-3,"× 副作用を好転反応と決めつけるのはNG。"],
+      ["別の漢方を追加して胃薬がわりにする",-1,"△ 安易な多剤併用は生薬の重複や効果の打ち消しにつながる。"]]},
+ {id:"kikanai",cond:r=>!F[r.f].acute,
+  say:"2週間飲んでるけど、まだ効いた気がしないわ…",
+  ch:[["同じような方の改善例を出して、1か月ほどで兆しが出ることが多いと伝える",2,"◎ 慢性症状は1か月程度で兆しが出ることが多い。希望になる情報を。"],
+      ["「いいから黙って飲んでください」と伝える",-4,"× 突き放すのはNG。説明不足が原因です。"],
+      ["すぐ別の漢方に変える",-1,"△ 2週間で判断するのは早い。数か月まったく変化がなければ見直しを。"]]},
+ {id:"heiyou",cond:r=>F[r.f].kan,
+  say:"病院でも漢方をもらったの。一緒に飲んでいいかしら？",
+  ch:[["処方内容を確認し、甘草の重複や併用の意味がなければ一方を休薬するよう提案",2,"◎ 甘草の重複に注意。併用に意味がなければ一時休薬が無難。"],
+      ["漢方どうしなら何でも大丈夫と伝える",-4,"× 甘草の重複は偽アルドステロン症のリスク。"],
+      ["病院の薬をやめてうちの漢方だけにするよう言う",-2,"× それまでの治療を否定するのはNG。"]]},
+ {id:"ninshin",cond:r=>F[r.f].ninpu||F[r.f].dai,
+  say:"じつは妊娠がわかったんです！ このまま飲んでいいですか？",
+  ch:[["おめでとうを伝え、不安をあおらないように中止をすすめ、産婦人科と相談を",2,"◎ 駆瘀血剤・大黄剤は妊娠中は避ける。脅かさずに中止のアドバイスを。"],
+      ["漢方は自然のものだから大丈夫と伝える",-5,"× 駆瘀血剤や大黄は『下に降ろす』性質。妊娠中は避けます。"],
+      ["「すぐやめないと危ない！」と強く言う",-1,"△ 中止は正しいが、妊婦さんを脅かさない伝え方を。"]]},
+ {id:"nomikata",cond:r=>true,
+  say:"漢方って、何で飲むのがいいの？ 冷たいお茶でもいい？",
+  ch:[["白湯で、食前か食間（空腹時）に飲むのがおすすめと伝える",1,"◎ 白湯で煎じ薬に近づけ、香りも生かす。空腹時が基本。"],
+      ["ジュースやコーヒーで飲みやすくしてよいと伝える",-1,"△ できれば水か白湯で。冷たい飲みものは吸収を下げます。"],
+      ["食後に冷たい水で飲むようにと伝える",-1,"△ 冷えると吸収効率が下がる。胃にさわる場合のみ食後に。"]]}
+];
+
+// 聴き取りの返し方（『漢方相談便利帖』聴き取りの3大ポイントより）
+const LISTEN = [
+ {t:"ゆっくり大きくうなずき「そうでしたか、それはおつらかったですね」と返す",v:1,m:"◎ うなずきと受け返しで安心感が生まれた。話してくれることが増えた！"},
+ {t:"「それは今までの治療が間違っていましたね」と伝える",v:-1,m:"× これまでの治療を否定してしまった…お客さんが心を閉ざした。"},
+ {t:"カルテを見ながら「で、症状は？」と次々に質問する",v:0,m:"△ 話を聴いてもらえている実感がうすかったようだ。"}
+];
+const PAST = ["病院の薬もいろいろ試したんですけど…","ドラッグストアの薬を飲んでもよくならなくて…","ネットで調べて、自分でいろいろ試したんですけど…","家族にすすめられて来ました。前の漢方は合わなかったみたいで…"];
+
+// 月ごとのできごと（4月はじまりの会計年度）
+const EVENTS = {
+ 4:"新年度のスタート。歓迎会シーズンで胃腸の相談も。",
+ 5:"新緑の季節。花粉症の相談が落ちつき、梅雨を前に関節の不調が出はじめた。",
+ 6:"梅雨入り。湿気で頭痛・むくみ・関節の重だるさの相談が増えそう（湿邪）。",
+ 7:"夏本番。冷たいものの摂りすぎによる胃腸トラブル、熱中症に注意（暑邪）。",
+ 8:"猛暑が続く。汗をかいて悪化する湿疹の相談も。",
+ 9:"残暑と台風。気圧の変化による不調が増える季節。",
+ 10:"秋風が冷たくなってきた。かぜの相談がちらほら（風邪・寒邪）。",
+ 11:"朝晩の冷えこみ。冷えや胃腸の相談が増えてきた。",
+ 12:"かぜ・インフルエンザが流行中！ 乾燥にも注意（燥邪）。",
+ 1:"新年。寒さのピーク。かぜ薬の在庫は大丈夫？",
+ 2:"早くもスギ花粉が飛びはじめた。",
+ 3:"決算月！ 花粉症シーズンまっさかり。"
+};
+const MONTHS=[4,5,6,7,8,9,10,11,12,1,2,3];
+const FIXED = {rent:70000,staff:50000,util:15000,misc:10000};
+const AD_COST = 30000;
+const COST_RATE = 0.4;       // 仕入原価率
+const PER_MONTH = 6;          // 1か月に接客するお客さんの数
+// ===== ユーティリティ =====
+const $ = s => document.querySelector(s);
+const panel = $("#panel");
+const yen = n => (n<0?"-":"")+"¥"+Math.abs(Math.round(n)).toLocaleString("ja-JP");
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cost = id => Math.round(F[id].p*costRate());
+const badges = f => (f.kan?`<span class="badge b-kan">甘草${f.kan>1?"多":""}</span>`:"")+(f.mao?`<span class="badge b-mao">麻黄</span>`:"")+(f.dai?`<span class="badge b-dai">大黄</span>`:"")+(f.bushi?`<span class="badge b-bu">附子</span>`:"")+(f.ninpu?`<span class="badge b-nin">妊娠×</span>`:"");
+const catName = k => (CATS.find(c=>c[0]===k)||["",""])[1];
+const DEFAULT_SHOP="ドット漢方堂";
+
+// ===== サウンド =====
+let AC=null, sound=false;
+function beep(freq=660,dur=0.05,type="square",vol=0.04){
+  if(!sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(AC.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+dur);
+    o.stop(AC.currentTime+dur+0.02);
+  }catch(e){}
+}
+const jingle = seq => seq.forEach((f,i)=>setTimeout(()=>beep(f,0.09),i*90));
+$("#btn-snd").onclick=()=>{sound=!sound;$("#btn-snd").textContent=sound?"♪ON":"♪OFF";if(sound)jingle([523,659,784]);};
+
+// ===== ドット絵 =====
+const cv=$("#scene"), ctx=cv.getContext("2d");
+ctx.imageSmoothingEnabled=false;
+const BODY=[
+".....KKKKK......",
+"....KHHHHHK.....",
+"...KHHHHHHHK....",
+"...KHHHHHHHHK...",
+"..KSSHHHHHHHK...",
+"..KSKSSHHHHHK...",
+"..KSSSSSHHHK....",
+"...KSSSSSSK.....",
+"....KKSSKK......",
+"...KCCCCCCK.....",
+"..KCCCCCCCCK....",
+"..KCSCCCCCCK....",
+"..KSSCCCCCCK....",
+"...KCCCCCCK.....",
+"...KCCCCCCK.....",
+"...KPPPPPPK.....",
+"...KPPPKPPK.....",
+"...KPPKKPPK.....",
+"...KPPK.KPPK....",
+"...KPPK.KPPK....",
+"...KPPK.KPPK....",
+"..KBBBK.KBBBK...",
+"..KKKKK.KKKKK...",
+"................"];
+const LEGS_B=[
+"...KPPPPPPK.....",
+"...KPPPPPPK.....",
+"....KPPPPK......",
+"....KPPPPK......",
+"....KPPKPK......",
+"....KPPKPK......",
+"...KBBBKBBK.....",
+"...KKKKKKKK.....",
+"................"];
+const FAT=[
+"..KCCCCCCCK.....",
+".KCCCCCCCCCK....",
+".KCSCCCCCCCK....",
+".KSSCCCCCCCK....",
+".KCCCCCCCCCK....",
+"..KCCCCCCCK....."];
+function buildSprite(look,frame){
+  let g=BODY.map(r=>r.split(""));
+  if(look.fat) FAT.forEach((r,i)=>g[9+i]=r.split(""));
+  if(frame) LEGS_B.forEach((r,i)=>g[15+i]=r.split(""));
+  if(look.long){for(let r=6;r<=11;r++){g[r][10]="H";g[r][11]="H";g[r][12]="K";}}
+  if(look.old){for(let r=12;r<=22;r++){g[r][0]="W";}g[12][1]="S";}
+  if(look.glasses){g[5][2]="G";g[5][4]="G";}
+  return g;
+}
+function drawSprite(g,look,x,y,s=2,flip=false){
+  const pal={K:"#000",H:look.hair,S:"#fcd8a8",C:look.cloth,P:look.pants,B:"#503000",W:"#ac7c00",G:"#3cbcfc"};
+  for(let r=0;r<g.length;r++)for(let c=0;c<16;c++){
+    const ch=g[r][c]; if(ch==="."||!ch) continue;
+    ctx.fillStyle=pal[ch]||"#f0f";
+    const cx=flip?15-c:c;
+    ctx.fillRect(x+cx*s,y+r*s,s,s);
+  }
+}
+const PHARM={hair:"#242424",cloth:"#fcfcfc",pants:"#3c3c3c",glasses:1};
+const CLOTHS=["#0058f8","#d82800","#00a800","#f878f8","#fca044","#3cbcfc","#7c7c7c","#ac7c00","#503000","#a4e4fc","#005800","#242424"];
+const HAIRS=["#242424","#503000","#7c3c00","#ac7c00"];
+function lookFor(cs){
+  const h=[...cs.nm].reduce((a,c)=>a+c.charCodeAt(0),0);
+  return {hair:cs.old?(h%2?"#bcbcbc":"#fcfcfc"):HAIRS[h%HAIRS.length],cloth:CLOTHS[h%CLOTHS.length],pants:["#242424","#503000","#0000bc","#7c7c7c"][h%4],
+    long:cs.g!=="m",old:cs.old,fat:cs.fat,kid:cs.g==="k"};
+}
+const KID={hair:"#503000",cloth:"#f8b800",pants:"#0058f8"};
+
+const bg=document.createElement("canvas");bg.width=256;bg.height=160;
+function paintBG(){
+  const b=bg.getContext("2d");
+  const R=(c,x,y,w,h)=>{b.fillStyle=c;b.fillRect(x,y,w,h);};
+  R("#c89858",0,0,256,116);
+  for(let x=0;x<256;x+=16){R("#b08040",x,0,1,116);}
+  R("#7c4c14",0,0,256,6);R("#503000",0,6,256,2);
+  R("#7c4c14",0,112,256,4);
+  for(let y=116;y<160;y+=8)for(let x=0;x<256;x+=8){R(((x+y)/8)%2?"#845c24":"#6c4c1c",x,y,8,8);}
+  // 百味箪笥
+  R("#503000",4,14,76,90);
+  for(let r=0;r<7;r++)for(let c=0;c<6;c++){
+    const x=7+c*12,y=17+r*12;R("#ac7c00",x,y,11,11);R("#c89858",x+1,y+1,9,1);R("#fcd8a8",x+4,y+5,3,2);R("#503000",x+5,y+5,1,1);
+  }
+  // 薬棚
+  R("#503000",132,26,64,66);
+  const cols=["#d82800","#00a800","#0058f8","#fcfcfc","#f8b800","#fc7460","#3cbcfc","#7c7c7c"];
+  for(let s=0;s<3;s++){R("#7c4c14",134,46+s*21,60,3);
+    for(let i=0;i<7;i++){const h=8+((i*7+s*3)%6),col=cols[(i+s*2)%cols.length];R(col,136+i*8,46+s*21-h,6,h);R("#000",136+i*8,46+s*21-h,6,1);R("#fcfcfc",137+i*8,46+s*21-h+3,1,2);}
+  }
+  // ドアとのれん
+  R("#503000",210,34,42,82);R("#241800",213,38,36,78);
+  R("#0000bc",213,38,36,30);
+  for(let i=0;i<3;i++)R("#000080",213+i*12+11,38,1,30);
+  b.fillStyle="#fcfcfc";b.beginPath();b.arc(231,52,8,0,Math.PI*2);b.fill();
+  b.fillStyle="#0000bc";b.font="11px DotGothic16, monospace";b.textAlign="center";b.textBaseline="middle";b.fillText("薬",231,53);
+  // 観葉植物
+  R("#7c4c14",196,132,14,14);R("#503000",196,132,14,2);
+  [[203,110],[198,118],[208,116],[201,124],[206,126]].forEach(([x,y])=>{R("#00a800",x-4,y,8,6);R("#58d854",x-3,y+1,3,2);});
+  // カウンター
+  R("#7c4c14",36,100,96,6);R("#ac7c00",36,100,96,2);
+  R("#503000",40,106,88,34);
+  for(let x=44;x<128;x+=14)R("#6c3c0c",x,110,10,26);
+  // 薬研と天秤
+  R("#7c7c7c",44,94,18,6);R("#5c5c5c",46,98,14,2);R("#bcbcbc",50,90,6,6);R("#503000",52,86,2,6);
+  R("#7c7c7c",112,90,2,10);R("#7c7c7c",104,90,18,1);R("#f8b800",103,94,6,2);R("#f8b800",117,94,6,2);R("#503000",108,98,10,2);
+}
+let tick=0;
+const scene={cust:null,effects:[],month:4,shop:DEFAULT_SHOP};
+function drawSign(){
+  const x=124,y=4,w=128,h=18;
+  ctx.fillStyle="#503000";ctx.fillRect(x,y,w,h);ctx.fillStyle="#fcd8a8";ctx.fillRect(x+2,y+2,w-4,h-4);
+  let fs=11;ctx.textAlign="center";ctx.textBaseline="middle";
+  do{ctx.font=fs+"px DotGothic16, monospace";if(ctx.measureText(scene.shop).width<=w-10)break;fs--;}while(fs>6);
+  ctx.fillStyle="#503000";ctx.fillText(scene.shop,x+w/2,y+h/2+1);
+}
+function drawCalendar(){
+  ctx.fillStyle="#fcfcfc";ctx.fillRect(92,14,26,26);
+  ctx.fillStyle="#d82800";ctx.fillRect(92,14,26,7);
+  ctx.fillStyle="#000";ctx.font="10px DotGothic16, monospace";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText(scene.month+"月",105,31);
+}
+function drawBubble(x,y,kind){
+  y-=Math.floor(tick/15)%2;
+  if(kind==="heart"){ctx.fillStyle="#f878f8";[[1,0],[2,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[1,3],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[4,4],[3,5]].forEach(([a,b])=>ctx.fillRect(x+a*2,y+b*2,2,2));return;}
+  if(kind==="sweat"){ctx.fillStyle="#3cbcfc";ctx.fillRect(x+4,y,2,2);ctx.fillRect(x+2,y+2,6,4);ctx.fillRect(x+4,y+6,2,2);return;}
+  ctx.fillStyle="#fcfcfc";ctx.fillRect(x,y,14,14);ctx.fillStyle="#000";ctx.fillRect(x+1,y+1,12,12);
+  ctx.fillStyle=kind==="!"?"#f83800":"#f8b800";ctx.font="11px DotGothic16, monospace";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(kind,x+7,y+8);
+}
+function frame(){
+  tick++;
+  ctx.drawImage(bg,0,0);
+  drawSign();drawCalendar();
+  const pb=Math.floor(tick/40)%2;
+  drawSprite(buildSprite(PHARM,0),PHARM,72,70+pb,2,true);
+  ctx.drawImage(bg,36,100,96,40,36,100,96,40);
+  const c=scene.cust;
+  if(c){
+    if(Math.abs(c.x-c.tx)>0.5){c.x+=(c.tx>c.x?1:-1)*1.2;c.walk=true;}else{c.x=c.tx;c.walk=false;if(c.onArrive){const f=c.onArrive;c.onArrive=null;f();}}
+    const fr=c.walk?Math.floor(tick/8)%2:0, flip=c.tx>c.x+0.5;
+    drawSprite(buildSprite(c.look,fr),c.look,Math.round(c.x),100,2,flip);
+    if(c.look.kid) drawSprite(buildSprite(KID,fr),KID,Math.round(c.x)+28,124,1,flip);
+    if(c.bubble&&!c.walk) drawBubble(Math.round(c.x)+18,82,c.bubble);
+  }
+  scene.effects=scene.effects.filter(e=>e.t-->0);
+  scene.effects.forEach(e=>{
+    ctx.font="10px DotGothic16, monospace";ctx.textAlign="center";ctx.textBaseline="middle";
+    const yy=e.y-(60-e.t)*0.4;
+    ctx.fillStyle="#000";ctx.fillText(e.txt,e.x+1,yy+1);ctx.fillStyle=e.col;ctx.fillText(e.txt,e.x,yy);
+  });
+  requestAnimationFrame(frame);
+}
+function fx(txt,col="#f8b800",x=150,y=90){scene.effects.push({txt,col,x,y,t:60});}
+function custEnter(look,done){scene.cust={look,x:236,tx:128,bubble:null,onArrive:done};}
+function custLeave(done){if(!scene.cust)return done&&done();scene.cust.bubble=null;scene.cust.tx=280;scene.cust.onArrive=()=>{scene.cust=null;done&&done();};}
+
+// ===== ゲーム状態 =====
+let S=null, C=null, current=null;
+const SAVE_KEY="dot-kampo-save-v2";
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function loadSave(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+const SURN=["アオキ","イデ","ウチダ","エノモト","オギノ","カジ","キクチ","クドウ","コウノ","サノ","シバタ","スガ","セキ","ソノダ","タキ","チバ","ツルタ","テラダ","トミタ","ナイトウ","ニイミ","ノグチ","ハタ","ヒロセ","フジイ","ホシノ","マキ","ミズノ","ムトウ","メグロ","ヤギ","ユアサ","ヨネダ","ワカバヤシ"];
+
+function newGame(shop){
+  const stock={};FIDS.forEach(id=>stock[id]=0);
+  S={shop,fy:1,mi:0,cash:1500000,rep:20,stock,
+     regs:["hochu","toki","hachimi","kami","rikkun"].map(f=>({f,nm:pick(SURN)})),
+     loan:0,ad:false,yr:newYear(0),
+     tot:{best:0,ok:0,miss:0,unsafe:0,redOk:0,redMiss:0,refer:0,n:0,yojo:0,listen:0},
+     month:null};
+}
+function newYear(invBegin){return {invBegin,sales:0,salesServe:0,salesAuto:0,salesReg:0,purchase:0,rent:0,staff:0,util:0,misc:0,ad:0,interest:0,served:0};}
+function invValue(){return FIDS.reduce((s,id)=>s+(S.stock[id]||0)*cost(id),0);}
+function regCount(id){return S.regs.filter(r=>r.f===id).length;}
+function curMonth(){return MONTHS[S.mi];}
+function inSeason(cs,m){const sea=cs.sea||[];return !sea.length?1:(sea.includes(m)?3:0.15);}
+function weightedPick(list,wfn){const w=list.map(wfn);let t=w.reduce((a,b)=>a+b,0),r=Math.random()*t;for(let i=0;i<list.length;i++){r-=w[i];if(r<=0)return list[i];}return list[list.length-1];}
+function accuracy(){const t=S.tot;const n=t.best+t.ok+t.miss+t.unsafe;return n?(t.best+0.6*t.ok)/n:0.5;}
+
+function updateHUD(){
+  if(!S){["#h-date","#h-cash","#h-rep","#h-reg"].forEach(s=>$(s).textContent="-");return;}
+  $("#h-date").textContent=`${S.fy}年目 ${curMonth()}月`;
+  $("#h-cash").textContent=yen(S.cash);
+  const r=Math.round(S.rep);
+  $("#h-rep").textContent="★".repeat(Math.ceil(r/20)||0).padEnd(5,"☆")+" "+r;
+  $("#h-reg").textContent=S.regs.length+"人";
+  scene.month=curMonth();scene.shop=S.shop||DEFAULT_SHOP;
+}
+function show(fn){current=fn;fn();updateHUD();}
+
+let typeTimer=null;
+function typeInto(el,text,cb){
+  clearInterval(typeTimer);let i=0;el.textContent="";
+  typeTimer=setInterval(()=>{i+=1;el.textContent=text.slice(0,i);if(i%3===0)beep(880,0.02,"square",0.02);
+    if(i>=text.length){clearInterval(typeTimer);cb&&cb();}},28);
+  el.onclick=()=>{clearInterval(typeTimer);el.textContent=text;cb&&cb();};
+}
+
+// ===== タイトル・屋号 =====
+function titleScreen(){
+  const sv=loadSave();
+  scene.cust=null;scene.shop=DEFAULT_SHOP;
+  panel.innerHTML=`
+   <h2 class="center">ドット漢方堂</h2>
+   <p class="center small">〜 まちの漢方薬局けいえいシミュレーション 〜</p>
+   <p>あなたは町の小さな漢方薬局をひきついだ薬剤師。お客さんの話をよく<b class="warn">聴き</b>、問診と舌で<b class="warn">「証（しょう）」</b>を見きわめ、ぴったりの漢方と養生をアドバイスしよう。<br>仕入れ・家賃・人件費をやりくりして、1年後の<b class="warn">決算</b>で黒字をめざせ！</p>
+   <div class="row" style="justify-content:center">
+     <button class="primary" id="b-new">はじめから</button>
+     ${sv?`<button id="b-cont">つづきから（${esc(sv.shop)}・${sv.fy}年目 ${MONTHS[sv.mi]}月）</button>`:""}
+     <button id="b-how">あそびかた</button>
+   </div>
+   <p class="center blink warn">▶ ボタンをえらんでね</p>
+   <p class="center small">※ゲーム内の情報は学習・娯楽用に簡略化したものです。実際の服用の判断には使わず、医師・薬剤師にご相談ください。</p>`;
+  $("#b-new").onclick=()=>{beep(784,.1);show(nameScreen);};
+  if(sv) $("#b-cont").onclick=()=>{beep(784,.1);S=migrate(sv);show(monthStart);};
+  $("#b-how").onclick=()=>openHelp();
+}
+function nameScreen(){
+  const ideas=["ひだまり漢方堂","せき漢方薬局","さくら薬局","みどり漢方堂","まるやく漢方"];
+  panel.innerHTML=`
+   <div class="speaker">薬局の名前をきめよう</div>
+   <p class="small">看板にかかげる屋号です（10文字まで）。</p>
+   <input id="shop-name" type="text" maxlength="10" value="${esc(DEFAULT_SHOP)}" aria-label="薬局の名前" autocomplete="off">
+   <div class="tabs">${ideas.map(n=>`<button type="button" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+   <div class="row"><button class="primary" id="n-ok">この名前で開業する ▶</button><button id="n-back">◀ もどる</button></div>`;
+  const inp=$("#shop-name");
+  const preview=()=>{scene.shop=inp.value.trim()||DEFAULT_SHOP;};
+  inp.oninput=preview;inp.onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)$("#n-ok").click();};
+  panel.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{inp.value=b.dataset.n;preview();beep(600,.03);});
+  $("#n-ok").onclick=()=>{const nm=(inp.value.trim()||DEFAULT_SHOP).slice(0,10);newGame(nm);jingle([523,659,784,1047]);fx("開業！","#f8b800",188,40);show(monthStart);};
+  $("#n-back").onclick=()=>show(titleScreen);
+  preview();
+}
+
+// ===== 月のはじめ =====
+function monthStart(){
+  const m=curMonth();
+  if(!S.month||S.month.key!==S.fy+"-"+S.mi||(S.month.served===0&&!S.month.ordered)){
+    S.month={key:S.fy+"-"+S.mi,served:0,queue:buildQueue(m),log:[],sales:0,orderCost:0,follow:false};
+    save();
+  }
+  panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ できごと</div>
+   <div class="msg" id="m-msg"></div>
+   <div class="small">今月の固定費：家賃 ${yen(FIXED.rent)}／人件費 ${yen(FIXED.staff)}／水道光熱 ${yen(FIXED.util)}／雑費 ${yen(FIXED.misc)}${S.loan?`／借入利息あり`:""}</div>
+   <div class="row"><button class="primary" id="b-order">仕入れをする ▶</button></div>`;
+  typeInto($("#m-msg"),EVENTS[m]+(S.mi===0&&S.fy===1?`\n\n「${S.shop}」開業！ 前の店主から常連さんを5人引きついだ。まずは漢方の在庫を仕入れよう。`:""));
+  $("#b-order").onclick=()=>show(orderScreen);
+}
+function buildQueue(m){
+  const q=[];const pool=CASES.slice();
+  while(q.length<PER_MONTH&&pool.length){
+    const c=weightedPick(pool,cs=>inSeason(cs,m)*(cs.red?0.45:1));
+    q.push(CASES.indexOf(c));pool.splice(pool.indexOf(c),1);
+  }
+  return q;
+}
+
+// ===== 仕入れ =====
+let order={}, ordTab="all";
+function suggest(id){
+  const f=F[id],m=curMonth();
+  const seasonal=CASES.filter(cs=>!cs.red&&cs.best[0]===id).reduce((s,cs)=>s+inSeason(cs,m),0);
+  const want=regCount(id)+Math.ceil(seasonal*(f.acute?1.2:0.8))+(f.acute?0:1);
+  return Math.max(0,want-S.stock[id]);
+}
+function catTabs(id,cur){return `<div class="tabs" id="${id}">${CATS.map(([k,l])=>`<button class="${k===cur?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;}
+function orderScreen(){
+  if(!Object.keys(order).length) FIDS.forEach(id=>order[id]=0);
+  const total=FIDS.reduce((s,id)=>s+order[id]*cost(id),0);
+  const ids=FIDS.filter(id=>ordTab==="all"||F[id].cat===ordTab);
+  panel.innerHTML=`
+   <div class="speaker">仕入れ（1箱＝1か月分／かぜ薬など急性向けは1週間分・原価は売価の${COST_RATE*100}%）</div>
+   ${catTabs("o-tabs",ordTab)}
+   <div class="list">${ids.map(id=>{const f=F[id];return `
+     <div class="order-row">
+       <div>${f.n}${badges(f)}<div class="small">在庫 ${S.stock[id]}／常連 ${regCount(id)}人／原価 ${yen(cost(id))}</div></div>
+       <span class="rd small">${yen(f.p)}</span>
+       <button data-id="${id}" data-d="-1" aria-label="${f.n}をへらす">－</button>
+       <span class="q">${order[id]}</span>
+       <button data-id="${id}" data-d="1" aria-label="${f.n}をふやす">＋</button>
+     </div>`;}).join("")}</div>
+   <div>仕入れ合計 <b class="warn">${yen(total)}</b>　のこり現金 <b class="${S.cash-total<0?"bad":""}">${yen(S.cash-total)}</b></div>
+   <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="o-ad" ${S.ad?"checked":""}> 今月チラシ広告を出す（${yen(AD_COST)}・口コミ新規が増える）</label>
+   <div class="row">
+     <button id="o-auto">おまかせ発注</button>
+     <button id="o-clear">クリア</button>
+     <button class="primary" id="o-ok" ${S.cash-total<0?"disabled":""}>これで仕入れる ▶</button>
+     ${S.cash<300000?`<button class="danger" id="o-loan">銀行から借りる（${yen(500000)}・年利1.5%）</button>`:""}
+   </div>`;
+  panel.querySelectorAll("#o-tabs button").forEach(b=>b.onclick=()=>{ordTab=b.dataset.k;orderScreen();});
+  panel.querySelectorAll(".order-row button").forEach(b=>b.onclick=()=>{const id=b.dataset.id;order[id]=clamp(order[id]+ +b.dataset.d,0,99);beep(520,.03);const y=panel.querySelector(".list").scrollTop;orderScreen();panel.querySelector(".list").scrollTop=y;});
+  $("#o-ad").onchange=e=>{S.ad=e.target.checked;};
+  $("#o-auto").onclick=()=>{
+    FIDS.forEach(id=>order[id]=suggest(id));
+    // 現金の範囲におさめる（常連さんの分を優先して残す）
+    let tot=FIDS.reduce((s,id)=>s+order[id]*cost(id),0);const budget=Math.max(0,S.cash-50000);
+    if(tot>budget){const ids=FIDS.slice().sort((a,b)=>regCount(a)-regCount(b));
+      let guard=0;while(tot>budget&&guard++<5000){let cut=false;for(const id of ids){if(tot<=budget)break;if(order[id]>regCount(id)||(order[id]>0&&guard>200)){order[id]--;tot-=cost(id);cut=true;}}if(!cut)break;}}
+    beep(660,.06);orderScreen();};
+  const lb=$("#o-loan");if(lb)lb.onclick=()=>{S.loan+=500000;S.cash+=500000;jingle([523,659]);fx("借入 +"+yen(500000),"#fc7460",170,70);orderScreen();};
+  $("#o-clear").onclick=()=>{FIDS.forEach(id=>order[id]=0);orderScreen();};
+  $("#o-ok").onclick=()=>{
+    FIDS.forEach(id=>{S.stock[id]+=order[id];});
+    S.cash-=total;S.yr.purchase+=total;S.month.orderCost=total;S.month.ordered=true;
+    order={};jingle([392,523,659]);
+    if(total>0)fx("仕入れ -"+yen(total),"#fc7460",170,70);
+    maybeFollow();
+  };
+}
+
+// ===== 経過確認（常連さんのフォロー） =====
+function maybeFollow(){
+  if(S.month.follow||!S.regs.length||Math.random()>0.5){S.month.follow=true;nextCustomer();return;}
+  S.month.follow=true;
+  const cands=[];S.regs.forEach(r=>FOLLOW.forEach(ev=>{if(ev.cond(r))cands.push({r,ev});}));
+  if(!cands.length){nextCustomer();return;}
+  const {r,ev}=pick(cands);
+  if(!r.nm) r.nm=pick(SURN);
+  const ch=shuffle(ev.ch);
+  const render=()=>{
+    panel.innerHTML=`
+     <div class="speaker">経過確認 ─ 常連の${esc(r.nm)}さん（${F[r.f].n}を服用中）</div>
+     <div class="msg">「${esc(ev.say)}」</div>
+     <p class="small">どう対応する？</p>
+     <div class="list">${ch.map((c,i)=>`<button class="item" data-i="${i}"><span class="ds" style="color:inherit;font-size:13px">${esc(c[0])}</span></button>`).join("")}</div>`;
+    panel.querySelectorAll(".item").forEach(b=>b.onclick=()=>{
+      const c=ch[+b.dataset.i];S.rep=clamp(S.rep+c[1],0,100);
+      let lost="";
+      if(c[1]<=-2){S.regs=S.regs.filter(x=>x!==r);lost=`<p class="bad small">${esc(r.nm)}さんは来なくなってしまった…（常連 -1）</p>`;}
+      if(c[1]>0){jingle([659,784,1047]);fx("評判+"+c[1],"#58d854",170,70);}else{jingle([330,262]);fx("評判"+c[1],"#fc7460",170,70);}
+      const done=()=>{panel.innerHTML=`<div class="speaker">${c[1]>0?"よい対応！":"うーん…"}</div><div class="karte"><div>${esc(c[2])}</div></div>${lost}<div class="row"><button class="primary" id="f-next">店をあける ▶</button></div>`;
+        $("#f-next").onclick=()=>{current=null;nextCustomer();};};
+      show(done);
+    });
+  };
+  show(render);
+}
+
+// ===== 接客 =====
+function nextCustomer(){
+  if(S.month.served>=PER_MONTH){monthEnd();return;}
+  const cs=CASES[S.month.queue[S.month.served]];
+  C={cs,asked:{},pat:3,listen:null,past:pick(PAST),yojoOpts:null};
+  const wait=()=>{panel.innerHTML=`<div class="speaker">いらっしゃいませ…</div><div class="msg small">（${S.month.served+1}／${PER_MONTH}人目のお客さんが来店中）</div>`;};
+  current=wait;wait();
+  beep(988,.08);setTimeout(()=>beep(784,.12),90);
+  custEnter(lookFor(cs),()=>{scene.cust.bubble=cs.red?"!":"?";show(listenScreen);});
+}
+// 聴き取り（うなずき・受け返し・過去を否定しない）
+function listenScreen(){
+  const cs=C.cs;
+  if(C.listen!==null){show(talkScreen);return;}
+  if(!C.listenOpts)C.listenOpts=shuffle(LISTEN);
+  const opts=C.listenOpts;
+  panel.innerHTML=`
+   <div class="speaker">${esc(cs.nm)}（${cs.age}）</div>
+   <div class="msg" id="l-msg"></div>
+   <p class="small">まずは話をよく聴こう。どう返す？</p>
+   <div class="list">${opts.map((o,i)=>`<button class="item" data-i="${i}"><span class="ds" style="color:inherit;font-size:13px">${esc(o.t)}</span></button>`).join("")}</div>`;
+  typeInto($("#l-msg"),"「"+cs.say+"」\n「"+C.past+"」");
+  panel.querySelectorAll(".item").forEach(b=>b.onclick=()=>{
+    const o=opts[+b.dataset.i];C.listen=o.v;C.pat=3+(o.v>0?1:0)-(o.v<0?1:0)+patBonus();
+    if(o.v>0){S.tot.listen++;beep(784,.06);}else if(o.v<0){S.rep=clamp(S.rep-1,0,100);beep(220,.1);}
+    const res=()=>{panel.innerHTML=`<div class="speaker">${esc(cs.nm)}</div><div class="karte"><div>${esc(o.m)}</div><div class="small">問診できる回数：${C.pat}回</div></div><div class="row"><button class="primary" id="l-next">つぎへ ▶</button></div>`;
+      $("#l-next").onclick=()=>show(talkScreen);};
+    show(res);
+  });
+}
+function answerOf(k){const q=C.cs.q||{};return q[k]||(k==="shita"?BYO[C.cs.byo].shita:NONE);}
+function karteHTML(){
+  const ks=Object.keys(C.asked);
+  return `<div class="karte"><div class="small">▼ カルテ　主訴：${esc(C.cs.say)}</div>
+   <div><span class="k">見た目</span>：${esc(C.cs.mie||"ふつう")}（${C.cs.g==="m"?"男性":"女性"}・${C.cs.age}歳${C.cs.g==="k"?"・子ども連れ":""}）</div>
+   ${ks.map(k=>`<div><span class="k">${QCATS.find(q=>q[0]===k)[1].replace("は？","").replace("を見せてもらう","")}</span>：${esc(answerOf(k))}</div>`).join("")}</div>`;
+}
+function hearts(){return `<span class="hearts" title="問診できる回数">${"♥".repeat(C.pat)}</span>`;}
+function talkScreen(){
+  const cs=C.cs;
+  panel.innerHTML=`
+   <div class="speaker">${esc(cs.nm)}（${cs.age}）　${hearts()}</div>
+   ${karteHTML()}
+   <div class="row">
+     <button class="primary" id="t-ask" ${C.pat?"":"disabled"}>問診する（あと${C.pat}回）</button>
+     <button class="primary" id="t-sel">漢方をえらぶ</button>
+     <button class="danger" id="t-ref">受診をすすめる</button>
+   </div>`;
+  $("#t-ask").onclick=()=>show(askScreen);
+  $("#t-sel").onclick=()=>{selTab="all";show(selectScreen);};
+  $("#t-ref").onclick=()=>show(confirmRefer);
+}
+function askScreen(){
+  panel.innerHTML=`
+   <div class="speaker">なにをたずねる？　${hearts()}</div>
+   <p class="small">まずは「冷え・のぼせ」「便通」から。虚実・寒熱・気血水、そして安全のための薬や妊娠の確認も大切。</p>
+   <div class="qgrid">${QCATS.map(([k,l])=>`<button data-k="${k}" ${C.asked[k]?"disabled":""}>${l}</button>`).join("")}</div>
+   <div class="row"><button id="a-back">◀ もどる</button></div>`;
+  panel.querySelectorAll(".qgrid button").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k;C.asked[k]=1;if(!(k==="shita"&&hasEq("light")))C.pat--;beep(660,.05);
+    const ans=()=>{panel.innerHTML=`<div class="speaker">${esc(C.cs.nm)}</div><div class="msg" id="a-ans"></div><div class="row"><button id="a-next">つぎへ ▶</button></div>`;
+      typeInto($("#a-ans"),k==="shita"?"（舌を見せてもらった）\n"+answerOf(k):"「"+answerOf(k)+"」");
+      $("#a-next").onclick=()=>show(C.pat?askScreen:talkScreen);};
+    show(ans);
+  });
+  $("#a-back").onclick=()=>show(talkScreen);
+}
+let selTab="all";
+function listHTML(ids,mode){
+  return `<div class="list">${ids.map(id=>{const f=F[id];const st=S?S.stock[id]:0;
+    return `<button class="item" data-id="${id}" ${mode==="sell"&&!st?"disabled":""}>
+      <span class="nm">${f.n}${badges(f)}</span>
+      <span class="stock ${mode==="sell"&&!st?"zero":""}">${mode==="sell"?(st?`在庫${st}・${yen(f.p)}`:"在庫切れ"):catName(f.cat)}</span>
+      <span class="rd">${f.y}　【${f.sho}】</span>
+      <span class="ds">${f.t}</span>
+    </button>`;}).join("")}</div>`;
+}
+function selectScreen(){
+  const ids=FIDS.filter(id=>selTab==="all"||F[id].cat===selTab);
+  panel.innerHTML=`
+   <div class="speaker">どの漢方をすすめる？</div>
+   ${karteHTML()}
+   ${catTabs("s-tabs",selTab)}
+   ${listHTML(ids,"sell")}
+   <div class="row"><button id="s-back">◀ もどる</button></div>`;
+  panel.querySelectorAll("#s-tabs button").forEach(b=>b.onclick=()=>{selTab=b.dataset.k;selectScreen();});
+  panel.querySelectorAll(".item").forEach(b=>b.onclick=()=>show(()=>confirmSell(b.dataset.id)));
+  $("#s-back").onclick=()=>show(talkScreen);
+}
+function detailHTML(id){
+  const f=F[id];
+  return `<h2>${f.n} <span class="small">${f.y}</span></h2>
+   <div>${badges(f)} <span class="small">${catName(f.cat)}　証【${f.sho}】</span></div>
+   <p><span style="color:var(--blue)">用いる理論</span>　${f.riron}</p>
+   <p><span style="color:var(--blue)">目標</span>　${f.t}</p>
+   <p><span style="color:var(--blue)">構成生薬</span>　${f.herbs}</p>
+   <p><span style="color:var(--gold)">注意</span>　${f.c}</p>`;
+}
+function confirmSell(id){
+  const f=F[id];
+  panel.innerHTML=`${detailHTML(id)}
+   <p class="small">売価 ${yen(f.p)}（${f.acute?"1週間分・急性向け":"1か月分・続けやすい"}）　在庫 ${S.stock[id]}</p>
+   <div class="row"><button class="primary" id="c-ok">これをすすめる</button><button id="c-back">◀ もどる</button></div>`;
+  $("#c-ok").onclick=()=>show(()=>yojoScreen(id));
+  $("#c-back").onclick=()=>show(selectScreen);
+}
+function confirmRefer(){
+  panel.innerHTML=`<div class="speaker">受診をすすめますか？</div>
+   <p>漢方は販売せず、医療機関の受診をすすめます。危険なサインや、すぐにコントロールが必要な病気のときの正しい判断ですが、必要のない場合は販売の機会をのがします。</p>
+   ${karteHTML()}
+   <div class="row"><button class="danger" id="r-ok">受診をすすめる</button><button id="r-back">◀ もどる</button></div>`;
+  $("#r-ok").onclick=()=>resolve("REFER",null);
+  $("#r-back").onclick=()=>show(talkScreen);
+}
+// 養生アドバイス
+function yojoScreen(id){
+  if(!C.yojoOpts){
+    const right=BYO[C.cs.byo];
+    const others=Object.keys(BYO).filter(k=>k!==C.cs.byo&&k!=="hyo");
+    const wrong=BYO[pick(others)];
+    const first=right.tip.split("。")[0];
+    C.yojoOpts=shuffle([
+      {t:"「"+right.tip+"」",v:1},
+      {t:"「"+wrong.tip+"」",v:0},
+      {t:"「"+first+"。守らないと、いつまでたってもよくなりませんよ！ 次までに直してくださいね」",v:-1}
+    ]);
+  }
+  panel.innerHTML=`
+   <div class="speaker">養生のアドバイス（${F[id].n}をお渡しするとき）</div>
+   <p class="small">漢方は生活・食養生とセット。お客さんの体質に合った内容を、寄りそう言い方で伝えよう。</p>
+   <div class="list">${C.yojoOpts.map((o,i)=>`<button class="item" data-i="${i}"><span class="ds" style="color:inherit;font-size:13px">${esc(o.t)}</span></button>`).join("")}</div>
+   <div class="row"><button id="y-back">◀ 漢方をえらびなおす</button></div>`;
+  panel.querySelectorAll(".item").forEach(b=>b.onclick=()=>resolve(id,C.yojoOpts[+b.dataset.i]));
+  $("#y-back").onclick=()=>show(selectScreen);
+}
+
+// ===== 判定 =====
+function isRisky(cs,f){
+  const r=cs.risk;if(!r)return false;
+  return !!((r.kan&&f.kan)||(r.mao&&f.mao)||(r.dai&&f.dai)||(r.bushi&&f.bushi)||(r.ninpu&&(f.ninpu||f.dai||f.mao)));
+}
+function resolve(id,yojo){
+  const cs=C.cs,t=S.tot;t.n++;S.yr.served++;
+  let kind,rep=0,sale=0,repeat=false,head,body,pRep=0;
+  const f=F[id];
+  if(cs.red){
+    if(id==="REFER"){kind="redOk";rep=5;head="◎ ナイス判断！";body="「すぐ病院に行ってみます。ありがとう！」";}
+    else{kind="redMiss";rep=-10;S.stock[id]--;head="× 危険なサインを見のがした…";body="後日、そのお客さんは重い病気で入院したと聞いた…。";}
+  }else if(id==="REFER"){
+    kind="refer";head="△ 受診の必要はなかったかも";body="「病院に行くほどじゃないと思うんだけど…」お客さんは何も買わずに帰った。";
+  }else{
+    S.stock[id]--;
+    if(isRisky(cs,f)){kind="unsafe";rep=-6;head="× 副作用・安全面の問題が…";body=`数日後「${cs.risk.mao&&f.mao?"動悸がして、具合が悪くなった":cs.risk.kan&&f.kan?"むくみと脱力感が出た":"産婦人科で、その漢方は妊娠中は避けてと言われた"}」と返品に来られた。持病・服用中の薬・妊娠の確認が大切！`;}
+    else if(cs.best.includes(id)){kind="best";rep=f.acute?4:3;sale=priceOf(id);pRep=0.75+(hasEq("booth")?0.05:0);if(cs.risk)S.flags.safe=true;head="◎ ぴったりの処方！";body=f.acute?"「すごく楽になりました！ 家族にもすすめますね」":"「体が楽になってきました。また続けて買いに来ます！」";}
+    else if(cs.ok.includes(id)){kind="ok";rep=1;sale=priceOf(id);pRep=0.35+(hasEq("booth")?0.05:0);head="○ まずまずの選択";body="「少しよくなった気がします」";}
+    else{kind="miss";rep=-4;sale=priceOf(id);head="× 証が合っていなかった…";body="「あんまり効かなかったなあ…」お客さんは残念そうだ。";}
+  }
+  let yojoMsg="";
+  if(yojo&&kind!=="unsafe"&&kind!=="redMiss"){
+    if(yojo.v>0){rep+=1;pRep+=0.1;t.yojo++;S.yt.yojo=(S.yt.yojo||0)+1;yojoMsg=`<span class="good">養生◎</span> 体質に合った養生を、寄りそって伝えられた。`;}
+    else if(yojo.v===0){pRep-=0.1;yojoMsg=`<span class="warn">養生△</span> 体質（${BYO[cs.byo].n}）に合わない養生だった。`;}
+    else{rep-=1;pRep-=0.25;yojoMsg=`<span class="bad">養生×</span> 内容は合っていたが、上から目線の言い方でお客さんが萎縮してしまった。`;}
+  }
+  if(C.listen>0)pRep+=0.05;else if(C.listen<0)pRep-=0.1;
+  repeat=sale>0&&!f.acute&&Math.random()<clamp(pRep,0,0.95);
+  t[kind]++;S.yt[kind]=(S.yt[kind]||0)+1;
+  S.rep=clamp(S.rep+rep,0,100);
+  if(sale){S.cash+=sale;S.yr.sales+=sale;S.yr.salesServe+=sale;S.month.sales+=sale;}
+  if(repeat) S.regs.push({f:id,nm:cs.nm.split(" ").pop().replace(/さん|くん/,"")});
+  S.month.log.push({nm:cs.nm,kind,id,sale});
+  S.month.served++;
+  const good=kind==="best"||kind==="redOk"||kind==="ok";
+  if(scene.cust)scene.cust.bubble=good?"heart":"sweat";
+  if(good)jingle([659,784,1047]);else jingle([330,262,196]);
+  if(sale)fx("+"+yen(sale),"#f8b800",150,86);
+  if(rep)fx(`評判${rep>0?"+":""}${rep}`,rep>0?"#58d854":"#fc7460",170,70);
+  const bestNames=cs.red?"受診勧奨":cs.best.map(b=>F[b].n).join("・")+(cs.ok.length?`（次点：${cs.ok.map(b=>F[b].n).join("・")}）`:"");
+  const renderResult=()=>{panel.innerHTML=`
+   <div class="speaker">${head}</div>
+   <div class="msg">${esc(body)}</div>
+   <div class="karte">
+     <div><span class="k">あなたの選択</span>：${id==="REFER"?"受診をすすめる":F[id].n}　${sale?`<span class="warn">売上 ${yen(sale)}</span>`:""}${repeat?` <span class="good">★常連になった！</span>`:""}</div>
+     ${yojoMsg?`<div>${yojoMsg}</div>`:""}
+     <div><span class="k">正解</span>：${bestNames}</div>
+     <div><span class="k">病態</span>：${BYO[cs.byo].n}</div>
+     <div><span class="k">解説</span>：${esc(cs.ex)}</div>
+   </div>
+   <div class="row"><button class="primary" id="r-next">見送る ▶</button></div>`;
+  $("#r-next").onclick=()=>{current=null;panel.innerHTML=`<div class="msg">ありがとうございました〜</div>`;custLeave(()=>nextCustomer());};
+  };
+  checkAch();
+  show(renderResult);
+}
+
+// ===== 月末 =====
+function monthEnd(){
+  const m=curMonth(),Y=S.yr,M=S.month;
+  const nAuto=4+Math.floor(S.rep/5)+(S.ad?4:0);
+  const acc=accuracy();
+  let autoSales=0,autoOk=0,autoLost=0,newRegs=0;
+  const pool=CASES.filter(c=>!c.red);
+  for(let i=0;i<nAuto;i++){
+    const cs=weightedPick(pool,c=>inSeason(c,m));const id=cs.best[0];
+    if(S.stock[id]<=0){autoLost++;continue;}
+    S.stock[id]--;autoSales+=F[id].p;
+    if(Math.random()<0.35+0.6*acc){autoOk++;if(!F[id].acute&&Math.random()<0.5){S.regs.push({f:id,nm:pick(SURN)});newRegs++;}}
+    else S.rep=clamp(S.rep-0.5,0,100);
+  }
+  let regSales=0,regLeft=0,regOut=0;const keep=[];
+  S.regs.forEach(r=>{
+    if(Math.random()<0.04){regLeft++;return;}
+    if(S.stock[r.f]>0){S.stock[r.f]--;regSales+=F[r.f].p;keep.push(r);}
+    else{regOut++;}
+  });
+  S.regs=keep;S.rep=clamp(S.rep-regOut+Math.min(2,keep.length/20),0,100);
+  const ad=S.ad?AD_COST:0;const interest=Math.round(S.loan*0.015/12);
+  const fixed=FIXED.rent+FIXED.staff+FIXED.util+FIXED.misc+ad+interest;
+  S.cash+=autoSales+regSales-fixed;
+  Y.sales+=autoSales+regSales;Y.salesAuto+=autoSales;Y.salesReg+=regSales;
+  Y.rent+=FIXED.rent;Y.staff+=FIXED.staff;Y.util+=FIXED.util;Y.misc+=FIXED.misc;Y.ad+=ad;Y.interest+=interest;
+  const monthSales=M.sales+autoSales+regSales;
+  const flow=monthSales-M.orderCost-fixed;
+  let loanMsg="";
+  if(S.cash<0){S.loan+=1000000;S.cash+=1000000;loanMsg=`<p class="bad">⚠ 資金がショート！ 銀行から ${yen(1000000)} を借り入れた（年利1.5%）。</p>`;}
+  S.ad=false;
+  if(autoSales+regSales){jingle([523,587,659,784]);fx("+"+yen(autoSales+regSales),"#f8b800",150,86);}
+  const cnt=k=>M.log.filter(l=>l.kind===k).length;
+  const renderEnd=()=>{panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ 月次レポート</div>
+   <div class="scroll">
+   <table>
+    <tr><th colspan="2">売上</th></tr>
+    <tr><td>接客での販売（${M.log.length}人）</td><td class="n">${yen(M.sales)}</td></tr>
+    <tr><td>口コミ新規（${nAuto}人来店／満足${autoOk}人${autoLost?`／<span class="bad">欠品${autoLost}人</span>`:""}）</td><td class="n">${yen(autoSales)}</td></tr>
+    <tr><td>常連さんのリピート（${keep.length}人）</td><td class="n">${yen(regSales)}</td></tr>
+    <tr class="total"><td>今月の売上</td><td class="n">${yen(monthSales)}</td></tr>
+    <tr><th colspan="2">支出</th></tr>
+    <tr><td>仕入れ</td><td class="n minus">-${yen(M.orderCost)}</td></tr>
+    <tr><td>家賃・人件費・光熱費・雑費</td><td class="n minus">-${yen(FIXED.rent+FIXED.staff+FIXED.util+FIXED.misc)}</td></tr>
+    ${ad?`<tr><td>広告宣伝費</td><td class="n minus">-${yen(ad)}</td></tr>`:""}
+    ${interest?`<tr><td>支払利息</td><td class="n minus">-${yen(interest)}</td></tr>`:""}
+    <tr class="total"><td>今月の収支（現金ベース）</td><td class="n ${flow<0?"bad":"good"}">${yen(flow)}</td></tr>
+   </table>
+   <p class="small">接客結果：◎${cnt("best")+cnt("redOk")}　○${cnt("ok")}　×${cnt("miss")+cnt("unsafe")+cnt("redMiss")}　△${cnt("refer")}
+   ／口コミから新しい常連 +${newRegs}人${regLeft?`／卒業・離脱 ${regLeft}人`:""}${regOut?`／<span class="bad">欠品で離れた常連 ${regOut}人</span>`:""}</p>
+   <p class="small">在庫の評価額（原価）：${yen(invValue())}</p>
+   ${loanMsg}
+   ${regOut||autoLost?`<p class="warn small">ヒント：欠品は機会損失。常連さんが多い漢方は多めに仕入れよう。</p>`:""}
+   </div>
+   <div class="row"><button class="primary" id="e-next">${S.mi===11?"決算へ ▶":"次の月へ ▶"}</button></div>`;
+  $("#e-next").onclick=()=>{if(S.mi===11){show(kessan);return;}S.mi++;show(monthStart);};
+  };
+  show(renderEnd);
+}
+
+// ===== 決算 =====
+function kessan(){
+  const Y=S.yr,endInv=invValue();
+  const cogs=Y.invBegin+Y.purchase-endInv;
+  const gross=Y.sales-cogs;
+  const sga=Y.rent+Y.staff+Y.util+Y.ad+Y.misc;
+  const op=gross-sga, ord=op-Y.interest;
+  const tax=ord>0?Math.round(ord*0.3)+70000:70000;
+  const net=ord-tax;
+  const t=S.tot,accPct=Math.round(accuracy()*100);
+  let title;
+  if(net>=150000&&S.rep>=70) title="地域でたよられる漢方名人";
+  else if(net>=0) title="黒字の堅実薬局";
+  else if(S.rep>=60) title="評判は上々、経営は修行中";
+  else title="まだまだ見習い薬剤師";
+  jingle([523,659,784,1047,784,1047]);
+  panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 決算（4月〜翌3月）</div>
+   <div class="scroll">
+   <h2 class="center">称号「${title}」</h2>
+   <h3>損益計算書</h3>
+   <table>
+    <tr><td>売上高</td><td class="n">${yen(Y.sales)}</td></tr>
+    <tr class="sub"><td>　接客 ${yen(Y.salesServe)}／口コミ新規 ${yen(Y.salesAuto)}／常連 ${yen(Y.salesReg)}</td><td></td></tr>
+    <tr><td>売上原価</td><td class="n minus">-${yen(cogs)}</td></tr>
+    <tr class="sub"><td>　期首棚卸 ${yen(Y.invBegin)}＋当期仕入 ${yen(Y.purchase)}－期末棚卸 ${yen(endInv)}</td><td></td></tr>
+    <tr class="total"><td>売上総利益（粗利）</td><td class="n">${yen(gross)}</td></tr>
+    <tr><td>地代家賃</td><td class="n minus">-${yen(Y.rent)}</td></tr>
+    <tr><td>給料手当</td><td class="n minus">-${yen(Y.staff)}</td></tr>
+    <tr><td>水道光熱費</td><td class="n minus">-${yen(Y.util)}</td></tr>
+    <tr><td>広告宣伝費</td><td class="n minus">-${yen(Y.ad)}</td></tr>
+    <tr><td>雑費</td><td class="n minus">-${yen(Y.misc)}</td></tr>
+    <tr class="total"><td>営業利益</td><td class="n ${op<0?"bad":"good"}">${yen(op)}</td></tr>
+    <tr><td>支払利息</td><td class="n minus">-${yen(Y.interest)}</td></tr>
+    <tr class="total"><td>経常利益</td><td class="n ${ord<0?"bad":"good"}">${yen(ord)}</td></tr>
+    <tr><td>法人税等（赤字でも均等割 ${yen(70000)}）</td><td class="n minus">-${yen(tax)}</td></tr>
+    <tr class="total"><td>当期純利益</td><td class="n ${net<0?"bad":"good"}">${yen(net)}</td></tr>
+   </table>
+   <h3>財産のようす（期末）</h3>
+   <table>
+    <tr><td>現金（税金支払前）</td><td class="n">${yen(S.cash)}</td></tr>
+    <tr><td>棚卸資産（在庫）</td><td class="n">${yen(endInv)}</td></tr>
+    <tr><td>借入金</td><td class="n ${S.loan?"bad":""}">${yen(S.loan)}</td></tr>
+   </table>
+   <h3>成績</h3>
+   <p>接客 ${t.n}人　◎${t.best+t.redOk}　○${t.ok}　×${t.miss}　副作用・安全${t.unsafe}　見のがし${t.redMiss}<br>証の的中率 ${accPct}%　／ 聴き取り◎ ${t.listen}回　／ 養生◎ ${t.yojo}回　／ 評判 ${Math.round(S.rep)}　／ 常連 ${S.regs.length}人</p>
+   </div>
+   <div class="row">
+     <button class="primary" id="k-next">${S.fy+1}年目へつづける ▶</button>
+     <button id="k-title">タイトルへ</button>
+   </div>`;
+  $("#k-next").onclick=()=>{S.cash-=tax;S.fy++;S.mi=0;S.yr=newYear(endInv);show(monthStart);};
+  $("#k-title").onclick=()=>{clearSave();S=null;updateHUD();show(titleScreen);};
+}
+
+// ===== ずかん・きほん =====
+let zTab="all";
+function openZukan(){
+  const back=current;
+  const close=()=>back?show(back):show(titleScreen);
+  const render=()=>{
+    const ids=FIDS.filter(id=>zTab==="all"||F[id].cat===zTab);
+    panel.innerHTML=`
+     <div class="speaker">漢方ずかん（${FIDS.length}処方）</div>
+     ${catTabs("z-tabs",zTab)}
+     ${listHTML(ids,"book")}
+     <div class="row"><button id="z-close">とじる</button></div>`;
+    panel.querySelectorAll("#z-tabs button").forEach(b=>b.onclick=()=>{zTab=b.dataset.k;render();});
+    panel.querySelectorAll(".item").forEach(b=>b.onclick=()=>{
+      panel.innerHTML=`<div class="scroll">${detailHTML(b.dataset.id)}</div><div class="row"><button id="z-back">◀ 一覧へ</button><button id="z-close2">とじる</button></div>`;
+      $("#z-back").onclick=render;$("#z-close2").onclick=close;
+    });
+    $("#z-close").onclick=close;
+  };
+  render();
+}
+function openHelp(){
+  const back=current;
+  panel.innerHTML=`
+   <div class="speaker">漢方のきほん と あそびかた</div>
+   <div class="scroll">
+    <h3>「病名」ではなく「証（しょう）」で選ぶ</h3>
+    <p>証とは、その人の体質・見た目・いま起きている病態をまとめたもの。同じかぜでも体力や汗、時期で処方がかわり（同病異治）、ちがう病気でも証が同じなら同じ処方を使います（異病同治）。</p>
+    <h3>4つのモノサシ（陰陽・寒熱・虚実・表裏）</h3>
+    <p><b class="warn">虚実</b>：実＝体力充実・がっしり／虚＝疲れやすい・胃腸が弱い。麻黄・大黄など強い生薬は実証向け。<br>
+       <b class="warn">寒熱</b>：冷えが主なら温め、熱・のぼせが主なら冷ます。<br>
+       <b class="warn">表裏</b>：かぜの引きはじめは体表（表）→発汗させる発表剤。</p>
+    <h3>急性病は「三陰三陽」、慢性病は「気血水」</h3>
+    <p>かぜは太陽病（桂枝湯・葛根湯・麻黄湯）→こじれて少陽病（柴胡剤）→陽明病（白虎加人参湯など）。冷えから始まる高齢者のかぜは少陰病（麻黄附子細辛湯）。</p>
+    <h3>病態と舌・養生</h3>
+    <table>${Object.values(BYO).filter(b=>b.n!=="表証（かぜ）").map(b=>`<tr><td style="white-space:nowrap;color:var(--gold)">${b.n}</td><td><span class="small">舌：${b.shita}</span><br>${b.tip}</td></tr>`).join("")}</table>
+    <h3>相談の流れと聴き取り</h3>
+    <p>来店 → 聴き取り → 証の見きわめ → 漢方の選択 → 養生のアドバイス → 経過確認。<br>
+       聴き取りの3大ポイント：①ゆっくり大きくうなずく ②「〇〇なんですね」と受け返す ③これまでの治療を否定しない。<br>
+       問診はまず「冷え」「のぼせ」「便通」から。睡眠・ストレス・胃腸・むくみ・口の渇きも証の手がかり。アドバイスは上から目線や批判をせず、一緒にできることを。</p>
+    <h3>安全のチェック</h3>
+    <p><span class="badge b-kan">甘草</span> 重複・利尿薬や高血圧の薬との併用で偽アルドステロン症（むくみ・高血圧・低カリウム）。<br>
+       <span class="badge b-mao">麻黄</span> 動悸・血圧上昇・不眠・排尿障害。高齢者・心臓病・妊娠中は注意。<br>
+       <span class="badge b-dai">大黄</span> 下痢。虚弱な人・妊娠中は注意。<br>
+       <span class="badge b-bu">附子</span> のぼせ・動悸・舌のしびれ。熱証には不向き。<br>
+       <span class="badge b-nin">妊娠×</span> 桂枝茯苓丸などの駆瘀血剤・瀉下剤は妊娠中は避ける。妊娠中のかぜは桂枝湯など穏やかなものを。<br>
+       飲み方は白湯で、食前・食間（空腹時）が基本。</p>
+    <h3>受診をすすめるとき</h3>
+    <p>①外科的な処置が必要 ②重い高血圧・梗塞など、すぐコントロールが必要 ③効くはずの漢方が数か月まったく効かない。ほかに胸痛・黒い便・乳児のぐったり・発熱をともなう背部痛・甘草の重複による症状なども受診勧奨を。</p>
+    <h3>経営のしくみ</h3>
+    <p>・<b class="warn">スタッフ</b>：店主が対応できる口コミ新規は月${OWNER_CAP}人まで。登録販売者・パート薬剤師を雇うと対応できる人数が増える（給料は毎月）。事務スタッフは仕入れ値の交渉や欠品対策。<br>
+       ・<b class="warn">設備</b>：相談ブース・舌診ライト・煎じ薬コーナー・看板・在庫管理システム。買った金額は5年かけて「減価償却費」になる。<br>
+       ・<b class="warn">出来事</b>：ライバル店の開店、インフルエンザ流行、原料の値上げ、健康フェアなど。<br>
+       ・<b class="warn">目標と実績</b>：毎年3つの目標（達成で評判+3）と、ずっと残る実績。画面左下の「実績」で確認。<br>
+       ・<b class="warn">決算書</b>：損益計算書（1年のもうけ）と貸借対照表（期末の財産と借金）。</p>
+    <h3>あそびかた</h3>
+    <p>1. 月のはじめに仕入れ（在庫がないと売れない・余った在庫は期末棚卸へ）。常連さんの経過確認が入ることも<br>
+       2. 毎月${PER_MONTH}人を接客。聴き取りの返し方で問診の回数が変わる。カルテ（見た目・問診・舌）を見て漢方をえらぶ<br>
+       3. 漢方を渡すときに養生をアドバイス。合った処方と養生で評判アップ・常連に<br>
+       4. 月末に口コミ新規・常連の売上が入り、家賃などの固定費を支払う<br>
+       5. 3月が終わると決算。損益計算書で当期純利益をチェック！</p>
+    <h3>ご注意</h3>
+    <p class="warn">ゲーム内の情報は学習・娯楽用に簡略化したものです。実際の服用の判断には使わず、医師・薬剤師にご相談ください。</p>
+    <p class="small">参考にした本：『漢方重要処方60』（横浜薬科大学 漢方和漢薬調査研究センター編）、『現場で使える 薬剤師・登録販売者のための漢方相談便利帖』『わかる！選べる！漢方薬163』（杉山卓也）。ゲーム用に内容を簡単にしています。実際の販売・服薬指導は添付文書や専門書で確認してください。</p>
+   </div>
+   <div class="row"><button id="h-close">とじる</button></div>`;
+  $("#h-close").onclick=()=>back?show(back):show(titleScreen);
+}
+$("#btn-zukan").onclick=()=>{beep(700,.04);openZukan();};
+$("#btn-help").onclick=()=>{beep(700,.04);openHelp();};
+
+// ===== 経営の拡張（スタッフ・設備・出来事・実績・目標・難易度・貸借対照表） =====
+// ※ 考え方は「ドット経営シム・キット」を参考に、ドット漢方堂用に新しく書いたものです
+
+const DIFF = {
+  easy:  {n:"かんたん",  cash:2000000, rep:30, fixed:0.8, pat:1, d:"資金が多く、固定費が安い。問診が1回多い"},
+  normal:{n:"ふつう",    cash:1500000, rep:20, fixed:1.0, pat:0, d:"標準のバランス"},
+  hard:  {n:"むずかしい",cash:1000000, rep:10, fixed:1.2, pat:0, d:"資金が少なく固定費が高い。早めにライバル店が来る"}
+};
+const STAFF = {
+  toroku: {n:"登録販売者",   pay:60000,  cap:6, skill:0.55, d:"口コミで来たお客さんを月に6人多く対応できる"},
+  yakuzai:{n:"パート薬剤師", pay:100000, cap:8, skill:0.75, d:"月に8人多く対応。常連さんのフォローで離れる人が減る"},
+  jimu:   {n:"事務スタッフ", pay:40000,  cap:0, skill:0,    d:"仕入れ値を交渉して原価率−3%。欠品で常連さんが離れるのを半分に"}
+};
+const HIRE_COST = 20000, TRAIN_COST = 20000;
+const EQUIP = {
+  booth:{n:"相談ブース",       price:300000, d:"落ち着いて話せる個室。問診が1回増え、常連になりやすさ+5%"},
+  light:{n:"舌診ライト",       price:80000,  d:"舌の色がよく見える。舌を見ても問診の回数が減らない"},
+  senji:{n:"煎じ薬コーナー",   price:500000, d:"煎じ薬も扱える。慢性向け漢方の売価+20%"},
+  sign: {n:"看板リニューアル", price:200000, d:"目立つ看板で、口コミ新規が月に3人増える"},
+  pos:  {n:"在庫管理システム", price:150000, d:"欠品しそうな漢方を自動で取り寄せ。欠品で常連さんが離れない"}
+};
+const OWNER_CAP = 10; // 店主（あなた）と既存パートで対応できる口コミ新規の人数／月
+
+const RANDOM_EVENTS = [
+  {id:"rival", cond:()=>!S.rival&&(S.fy>1||S.mi>=(S.diff==="hard"?2:5)),
+   text:"近くに大型ドラッグストアが開店した！ 口コミ新規が減りそうだ…（評判60以上なら影響は小さい）",
+   apply:()=>{S.rival=true;}},
+  {id:"flu", cond:()=>[11,12,1,2].includes(curMonth()),
+   text:"インフルエンザが大流行！ 今月はかぜの相談が多くなりそう。かぜ薬の在庫を多めに。",
+   apply:()=>{S.month.flu=true;}},
+  {id:"tv", cond:()=>true, text:"テレビで漢方の特集が放送された！ 今月は口コミ新規が4人増えそう。",
+   apply:()=>{S.month.bonus=(S.month.bonus||0)+4;}},
+  {id:"price", cond:()=>S.costRate<0.46, text:"生薬の原料が値上がりした…。今月から仕入れ値が上がる（原価率+2%）。",
+   apply:()=>{S.costRate=Math.round((S.costRate+0.02)*100)/100;}},
+  {id:"typhoon", cond:()=>[7,8,9].includes(curMonth()), text:"台風で1日臨時休業…。今月の接客は1人少ない。",
+   apply:()=>{S.month.fewer=1;}},
+  {id:"review", cond:()=>S.tot.listen>=3, text:"口コミサイトに「親身に話を聴いてくれる薬局」と書かれた！ 評判+3",
+   apply:()=>{S.rep=clamp(S.rep+3,0,100);}},
+  {id:"fair", cond:()=>true, choice:{yes:"出展する（¥20,000）",no:"今回は見送る",cost:20000,rep:5},
+   text:"地域の健康フェアに出展しないかと誘われた。出展すると評判が上がりそうだ。"},
+  {id:"seminar", cond:()=>true, choice:{yes:"参加する（¥10,000）",no:"今回は見送る",cost:10000,rep:1,train:0.05},
+   text:"薬剤師会の漢方研修会がある。参加すると評判が少し上がり、スタッフの力ものびる。"}
+];
+
+const ACH = [
+  {id:"first",  n:"はじめての◎",       d:"ぴったりの処方を選んだ",        c:()=>S.tot.best>=1},
+  {id:"best50", n:"証の見きわめ上手",   d:"◎を50回",                       c:()=>S.tot.best>=50},
+  {id:"red1",   n:"命を守る判断",       d:"受診勧奨を正しく判断した",      c:()=>S.tot.redOk>=1},
+  {id:"red5",   n:"受診勧奨の名人",     d:"受診勧奨を正しく5回",           c:()=>S.tot.redOk>=5},
+  {id:"safe",   n:"安全第一",           d:"持病・薬・妊娠のリスクを見抜いた", c:()=>!!S.flags.safe},
+  {id:"listen10",n:"聴き上手",          d:"聴き取り◎を10回",               c:()=>S.tot.listen>=10},
+  {id:"yojo20", n:"養生の達人",         d:"養生アドバイス◎を20回",         c:()=>S.tot.yojo>=20},
+  {id:"reg10",  n:"なじみのお店",       d:"常連さん10人",                  c:()=>S.regs.length>=10},
+  {id:"reg50",  n:"地域の漢方薬局",     d:"常連さん50人",                  c:()=>S.regs.length>=50},
+  {id:"staff1", n:"はじめての仲間",     d:"スタッフを採用した",            c:()=>S.staff.length>=1},
+  {id:"equip3", n:"設備充実",           d:"設備を3つそろえた",             c:()=>Object.keys(S.eq).length>=3},
+  {id:"black",  n:"黒字決算",           d:"当期純利益がプラスの決算",      c:()=>!!S.flags.black},
+  {id:"noloan", n:"無借金経営",         d:"借入なしで決算を迎えた",        c:()=>!!S.flags.noloanKessan},
+  {id:"rep100", n:"評判MAX",            d:"評判100に到達",                 c:()=>S.rep>=100},
+  {id:"year3",  n:"3年目の春",          d:"3年目に入った",                 c:()=>S.fy>=3},
+  {id:"hard",   n:"逆境をこえて",       d:"むずかしいで黒字決算",          c:()=>S.diff==="hard"&&!!S.flags.black}
+];
+const MISSIONS = [
+  {id:"reg30", n:"常連さん30人",                 c:()=>S.regs.length>=30},
+  {id:"rep70", n:"評判70以上",                   c:()=>S.rep>=70},
+  {id:"profit",n:"黒字決算（当期純利益プラス）", c:(net)=>net>0},
+  {id:"red3",  n:"受診勧奨を正しく3回（今年）",  c:()=>(S.yt.redOk||0)>=3},
+  {id:"acc80", n:"証の的中率80%以上（今年）",    c:()=>yearAcc()>=0.8},
+  {id:"noloan",n:"借入なしで決算",               c:()=>S.loan===0},
+  {id:"yojo10",n:"養生アドバイス◎を10回（今年）",c:()=>(S.yt.yojo||0)>=10}
+];
+
+// --- 補助 ---
+function costRate(){return (S&&S.costRate)||COST_RATE;}
+function hasEq(k){return !!(S&&S.eq&&S.eq[k]);}
+function hasStaff(k){return !!(S&&S.staff&&S.staff.some(s=>s.k===k));}
+function patBonus(){return (hasEq("booth")?1:0)+((S&&DIFF[S.diff])?DIFF[S.diff].pat:0);}
+function priceOf(id){const f=F[id];return Math.round(f.p*(hasEq("senji")&&!f.acute?1.2:1));}
+function fixedMul(){return (S&&DIFF[S.diff])?DIFF[S.diff].fixed:1;}
+function fixedCosts(){const m=fixedMul();return {rent:Math.round(FIXED.rent*m),staff:Math.round(FIXED.staff*m),util:Math.round(FIXED.util*m),misc:Math.round(FIXED.misc*m)};}
+function staffPay(){return S.staff.reduce((s,x)=>s+STAFF[x.k].pay,0);}
+function eqBook(){return Object.values(S.eq).reduce((s,e)=>s+(e.price-e.dep),0);}
+function yearAcc(){const t=S.yt;const n=(t.best||0)+(t.ok||0)+(t.miss||0)+(t.unsafe||0);return n?((t.best||0)+0.6*(t.ok||0))/n:0;}
+function pickMissions(){return shuffle(MISSIONS).slice(0,3).map(m=>m.id);}
+function migrate(s){
+  s.diff=s.diff||"normal"; s.staff=s.staff||[]; s.eq=s.eq||{}; s.ach=s.ach||{}; s.flags=s.flags||{};
+  s.costRate=s.costRate||COST_RATE; s.capital=s.capital||1500000; s.yt=s.yt||{};
+  s.missions=s.missions||pickMissions(); s.tot.yojo=s.tot.yojo||0; s.tot.listen=s.tot.listen||0;
+  ["dep","other","hire"].forEach(k=>{if(s.yr[k]==null)s.yr[k]=0;});
+  return s;
+}
+function checkAch(){
+  if(!S)return;
+  ACH.forEach(a=>{if(!S.ach[a.id]&&a.c()){S.ach[a.id]=`${S.fy}年目${curMonth()}月`;fx("実績「"+a.n+"」","#f878f8",150,56);jingle([784,988,1175]);}});
+}
+
+// --- 新しいゲーム（難易度つき） ---
+function newGame(shop,diff){
+  diff=diff||"normal";const D=DIFF[diff];
+  const stock={};FIDS.forEach(id=>stock[id]=0);
+  S={shop,diff,fy:1,mi:0,cash:D.cash,capital:D.cash,rep:D.rep,stock,
+     regs:["hochu","toki","hachimi","kami","rikkun"].map(f=>({f,nm:pick(SURN)})),
+     loan:0,ad:false,yr:newYear(0),costRate:COST_RATE,staff:[],eq:{},ach:{},flags:{},rival:false,
+     tot:{best:0,ok:0,miss:0,unsafe:0,redOk:0,redMiss:0,refer:0,n:0,yojo:0,listen:0},
+     yt:{},missions:pickMissions(),month:null};
+}
+function newYear(invBegin){return {invBegin,sales:0,salesServe:0,salesAuto:0,salesReg:0,purchase:0,rent:0,staff:0,util:0,misc:0,ad:0,interest:0,served:0,dep:0,other:0,hire:0};}
+
+let newDiff="normal";
+function nameScreen(){
+  const ideas=["ひだまり漢方堂","せき漢方薬局","さくら薬局","みどり漢方堂","まるやく漢方"];
+  panel.innerHTML=`
+   <div class="speaker">薬局の名前と難易度をきめよう</div>
+   <p class="small">看板にかかげる屋号です（10文字まで）。</p>
+   <input id="shop-name" type="text" maxlength="10" value="${esc(scene.shop||DEFAULT_SHOP)}" aria-label="薬局の名前" autocomplete="off">
+   <div class="tabs">${ideas.map(n=>`<button type="button" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+   <div class="speaker" style="margin-top:4px">難易度</div>
+   <div class="tabs" id="n-diff">${Object.entries(DIFF).map(([k,d])=>`<button type="button" class="${k===newDiff?"on":""}" data-d="${k}">${d.n}</button>`).join("")}</div>
+   <p class="small" id="n-diffd">${DIFF[newDiff].d}（資金 ${yen(DIFF[newDiff].cash)}）</p>
+   <div class="row"><button class="primary" id="n-ok">この名前で開業する ▶</button><button id="n-back">◀ もどる</button></div>`;
+  const inp=$("#shop-name");
+  const preview=()=>{scene.shop=inp.value.trim()||DEFAULT_SHOP;};
+  inp.oninput=preview;inp.onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)$("#n-ok").click();};
+  panel.querySelectorAll(".tabs button[data-n]").forEach(b=>b.onclick=()=>{inp.value=b.dataset.n;preview();beep(600,.03);});
+  panel.querySelectorAll("#n-diff button").forEach(b=>b.onclick=()=>{newDiff=b.dataset.d;const v=inp.value;nameScreen();$("#shop-name").value=v;beep(600,.03);});
+  $("#n-ok").onclick=()=>{const nm=(inp.value.trim()||DEFAULT_SHOP).slice(0,10);newGame(nm,newDiff);jingle([523,659,784,1047]);fx("開業！","#f8b800",188,40);show(monthStart);};
+  $("#n-back").onclick=()=>show(titleScreen);
+  preview();
+}
+
+// --- 月のはじめ（出来事つき） ---
+function buildQueue(m){
+  const q=[];const pool=CASES.slice();const n=PER_MONTH-((S.month&&S.month.fewer)||0);
+  while(q.length<n&&pool.length){
+    const c=weightedPick(pool,cs=>inSeason(cs,m)*(cs.red?0.45:1)*(S.month&&S.month.flu&&cs.best&&cs.best.some(b=>F[b].cat==="hyo"||F[b].acute)?2.5:1));
+    q.push(CASES.indexOf(c));pool.splice(pool.indexOf(c),1);
+  }
+  return q;
+}
+function monthStart(){
+  migrate(S);
+  const m=curMonth();
+  if(!S.month||S.month.key!==S.fy+"-"+S.mi){
+    S.month={key:S.fy+"-"+S.mi,served:0,queue:[],log:[],sales:0,orderCost:0,follow:false,ev:null,evDone:false,trained:false};
+    // 出来事（最初の月はなし）
+    if(!(S.fy===1&&S.mi===0)&&Math.random()<0.5){
+      const cands=RANDOM_EVENTS.filter(e=>e.cond());
+      if(cands.length){const e=pick(cands);S.month.ev=e.id;if(!e.choice){e.apply();S.month.evDone=true;}}
+    }
+    S.month.queue=buildQueue(m);
+    save();
+  }
+  const ev=S.month.ev?RANDOM_EVENTS.find(e=>e.id===S.month.ev):null;
+  const fc=fixedCosts();
+  panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ できごと</div>
+   <div class="msg" id="m-msg"></div>
+   ${ev?`<div class="karte"><div class="warn">★ ${esc(ev.text)}</div>${ev.choice&&!S.month.evDone?`<div class="row"><button class="primary" id="ev-yes">${ev.choice.yes}</button><button id="ev-no">${ev.choice.no}</button></div>`:""}</div>`:""}
+   <div class="small">固定費：家賃 ${yen(fc.rent)}／人件費 ${yen(fc.staff+staffPay())}／光熱 ${yen(fc.util)}／雑費 ${yen(fc.misc)}${S.loan?`／借入利息あり`:""}　原価率 ${Math.round(costRate()*100)}%${S.rival?"　<span class='bad'>ライバル店あり</span>":""}</div>
+   <div class="row"><button id="b-keiei">経営メニュー（スタッフ・設備）</button><button id="b-goal">今年の目標</button><button class="primary" id="b-order" ${ev&&ev.choice&&!S.month.evDone?"disabled":""}>仕入れをする ▶</button></div>`;
+  typeInto($("#m-msg"),EVENTS[m]+(S.mi===0&&S.fy===1?`\n\n「${S.shop}」開業！ 前の店主から常連さんを5人引きついだ。まずは漢方の在庫を仕入れよう。`:""));
+  if(ev&&ev.choice&&!S.month.evDone){
+    $("#ev-yes").onclick=()=>{const c=ev.choice;if(S.cash<c.cost){fx("お金が足りない","#fc7460");return;}
+      S.cash-=c.cost;S.yr.other+=c.cost;S.rep=clamp(S.rep+c.rep,0,100);
+      if(c.train)S.staff.forEach(s=>s.skill=Math.min(0.9,s.skill+c.train));
+      S.month.evDone=true;fx("評判+"+c.rep,"#58d854",170,70);jingle([659,784,1047]);save();show(monthStart);};
+    $("#ev-no").onclick=()=>{S.month.evDone=true;save();show(monthStart);};
+  }
+  $("#b-keiei").onclick=()=>show(keieiScreen);
+  $("#b-goal").onclick=()=>show(goalScreen);
+  $("#b-order").onclick=()=>show(orderScreen);
+}
+
+// --- 経営メニュー ---
+let keieiTab="staff";
+function keieiScreen(){
+  const tabs=`<div class="tabs" id="k-tabs">${[["staff","スタッフ"],["equip","設備"]].map(([k,l])=>`<button class="${k===keieiTab?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;
+  let body="";
+  if(keieiTab==="staff"){
+    body=`<p class="small">口コミで来る新規のお客さんは、店主だけだと月${OWNER_CAP}人までしか対応できません。評判が上がったらスタッフを増やそう（採用費 ${yen(HIRE_COST)}）。</p>
+     <div class="list">${Object.entries(STAFF).map(([k,st])=>{const hired=S.staff.find(s=>s.k===k);
+       return `<div class="order-row" style="grid-template-columns:1fr auto">
+         <div>${st.n}　<span class="small">月給 ${yen(st.pay)}${hired&&st.skill?`／対応力 ${Math.round(hired.skill*100)}`:""}</span><div class="small">${st.d}</div></div>
+         ${hired?`<button data-fire="${k}" class="danger">やめてもらう</button>`:`<button data-hire="${k}" class="primary" ${S.cash<HIRE_COST?"disabled":""}>採用する</button>`}
+       </div>`;}).join("")}</div>
+     <div class="row"><button id="k-train" ${!S.staff.some(s=>STAFF[s.k].skill)||S.month.trained||S.cash<TRAIN_COST?"disabled":""}>スタッフ研修（${yen(TRAIN_COST)}・対応力+5）${S.month.trained?"／今月は実施済み":""}</button></div>`;
+  }else{
+    body=`<p class="small">設備は買った月から5年かけて費用にします（減価償却）。決算書の「設備」にのります。</p>
+     <div class="list">${Object.entries(EQUIP).map(([k,e])=>`<div class="order-row" style="grid-template-columns:1fr auto">
+       <div>${e.n}　<span class="small">${yen(e.price)}</span><div class="small">${e.d}</div></div>
+       ${S.eq[k]?`<span class="good small">導入済み</span>`:`<button data-buy="${k}" class="primary" ${S.cash<e.price?"disabled":""}>導入する</button>`}
+     </div>`).join("")}</div>`;
+  }
+  panel.innerHTML=`<div class="speaker">経営メニュー　<span class="small">現金 ${yen(S.cash)}</span></div>${tabs}${body}<div class="row"><button id="k-back">◀ もどる</button></div>`;
+  panel.querySelectorAll("#k-tabs button").forEach(b=>b.onclick=()=>{keieiTab=b.dataset.k;keieiScreen();});
+  panel.querySelectorAll("[data-hire]").forEach(b=>b.onclick=()=>{const k=b.dataset.hire;S.cash-=HIRE_COST;S.yr.hire+=HIRE_COST;S.staff.push({k,skill:STAFF[k].skill});jingle([523,659,784]);fx(STAFF[k].n+"を採用！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
+  panel.querySelectorAll("[data-fire]").forEach(b=>b.onclick=()=>{const k=b.dataset.fire;S.staff=S.staff.filter(s=>s.k!==k);beep(330,.1);save();keieiScreen();});
+  panel.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const k=b.dataset.buy;const e=EQUIP[k];S.cash-=e.price;S.eq[k]={price:e.price,dep:0};jingle([523,659,784,1047]);fx(e.n+"を導入！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
+  const tr=$("#k-train");if(tr)tr.onclick=()=>{S.cash-=TRAIN_COST;S.yr.other+=TRAIN_COST;S.month.trained=true;S.staff.forEach(s=>{if(STAFF[s.k].skill)s.skill=Math.min(0.9,s.skill+0.05);});jingle([659,784]);save();keieiScreen();updateHUD();};
+  $("#k-back").onclick=()=>show(monthStart);
+}
+
+// --- 今年の目標・実績 ---
+function goalScreen(){
+  const back=current===goalScreen?monthStart:current;
+  panel.innerHTML=`<div class="speaker">${S.fy}年目の目標（決算で達成していれば評判+3ずつ）</div>
+   <div class="karte">${S.missions.map(id=>{const m=MISSIONS.find(x=>x.id===id);return `<div>□ ${m.n}</div>`;}).join("")}</div>
+   <div class="row"><button id="g-back">◀ もどる</button></div>`;
+  $("#g-back").onclick=()=>show(monthStart);
+}
+function openAch(){
+  const back=current;
+  const got=S?Object.keys(S.ach).length:0;
+  panel.innerHTML=`<div class="speaker">実績 ${got}／${ACH.length}</div>
+   <div class="scroll">${ACH.map(a=>{const d=S&&S.ach[a.id];return `<div class="karte" style="${d?"":"opacity:.5"}"><div>${d?"★":"☆"} <b class="${d?"warn":""}" style="font-weight:normal">${a.n}</b>　<span class="small">${a.d}${d?`（${d}）`:""}</span></div></div>`;}).join("")}
+   ${S?`<h3>${S.fy}年目の目標</h3><div class="karte">${S.missions.map(id=>`<div>□ ${MISSIONS.find(x=>x.id===id).n}</div>`).join("")}</div>`:""}</div>
+   <div class="row"><button id="a-close">とじる</button></div>`;
+  $("#a-close").onclick=()=>back?show(back):show(titleScreen);
+}
+
+// --- 月末（スタッフ・設備・ライバル・減価償却） ---
+function monthEnd(){
+  const m=curMonth(),Y=S.yr,M=S.month;
+  let demand=4+Math.floor(S.rep/5)+(S.ad?4:0)+(hasEq("sign")?3:0)+(M.bonus||0);
+  if(S.rival) demand-=S.rep>=60?1:3;
+  demand=Math.max(0,demand);
+  const acc=accuracy();
+  // 対応できる人：店主→スタッフの順
+  const handlers=[{n:OWNER_CAP,skill:0.35+0.6*acc}];
+  S.staff.forEach(s=>{const st=STAFF[s.k];if(st.cap)handlers.push({n:st.cap,skill:s.skill});});
+  let autoSales=0,autoOk=0,autoLost=0,newRegs=0,overflow=0,served=0;
+  const pool=CASES.filter(c=>!c.red);
+  for(let i=0;i<demand;i++){
+    let h=handlers.find(x=>x.n>0);
+    if(!h){overflow++;continue;}
+    const cs=weightedPick(pool,c=>inSeason(c,m)*(M.flu&&c.best.some(b=>F[b].acute)?2.5:1));const id=cs.best[0];
+    if(S.stock[id]<=0){autoLost++;continue;}
+    h.n--;served++;
+    S.stock[id]--;autoSales+=priceOf(id);
+    if(Math.random()<h.skill){autoOk++;if(!F[id].acute&&Math.random()<0.5+(hasEq("booth")?0.05:0)){S.regs.push({f:id,nm:pick(SURN)});newRegs++;}}
+    else S.rep=clamp(S.rep-0.5,0,100);
+  }
+  if(overflow)S.rep=clamp(S.rep-Math.min(3,overflow*0.3),0,100);
+  // 常連さん
+  let regSales=0,regLeft=0,regOut=0,autoBuy=0;const keep=[];
+  const churn=Math.max(0.01,0.04-(hasStaff("yakuzai")?0.02:0));
+  S.regs.forEach(r=>{
+    if(Math.random()<churn){regLeft++;return;}
+    if(S.stock[r.f]<=0&&hasEq("pos")){const c=cost(r.f);S.cash-=c;Y.purchase+=c;S.stock[r.f]++;autoBuy++;}
+    if(S.stock[r.f]>0){S.stock[r.f]--;regSales+=priceOf(r.f);keep.push(r);}
+    else if(hasStaff("jimu")&&Math.random()<0.5){keep.push(r);}
+    else regOut++;
+  });
+  S.regs=keep;S.rep=clamp(S.rep-regOut+Math.min(2,keep.length/20),0,100);
+  // 支払い
+  const fc=fixedCosts(),pay=staffPay();
+  const ad=S.ad?AD_COST:0;const interest=Math.round(S.loan*0.015/12);
+  let dep=0;Object.values(S.eq).forEach(e=>{const d=Math.min(Math.round(e.price/60),e.price-e.dep);e.dep+=d;dep+=d;});
+  const cashOut=fc.rent+fc.staff+pay+fc.util+fc.misc+ad+interest;
+  S.cash+=autoSales+regSales-cashOut;
+  Y.sales+=autoSales+regSales;Y.salesAuto+=autoSales;Y.salesReg+=regSales;
+  Y.rent+=fc.rent;Y.staff+=fc.staff+pay;Y.util+=fc.util;Y.misc+=fc.misc;Y.ad+=ad;Y.interest+=interest;Y.dep+=dep;
+  const monthSales=M.sales+autoSales+regSales;
+  const flow=monthSales-M.orderCost-cashOut;
+  let loanMsg="";
+  if(S.cash<0){S.loan+=1000000;S.cash+=1000000;loanMsg=`<p class="bad">⚠ 資金がショート！ 銀行から ${yen(1000000)} を借り入れた（年利1.5%）。</p>`;}
+  S.ad=false;
+  checkAch();
+  if(autoSales+regSales){jingle([523,587,659,784]);fx("+"+yen(autoSales+regSales),"#f8b800",150,86);}
+  const cnt=k=>M.log.filter(l=>l.kind===k).length;
+  const renderEnd=()=>{panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ 月次レポート</div>
+   <div class="scroll">
+   <table>
+    <tr><th colspan="2">売上</th></tr>
+    <tr><td>接客での販売（${M.log.length}人）</td><td class="n">${yen(M.sales)}</td></tr>
+    <tr><td>口コミ新規（来店${demand}人／対応${served}人・満足${autoOk}人${autoLost?`／<span class="bad">欠品${autoLost}人</span>`:""}${overflow?`／<span class="bad">手が回らず${overflow}人帰った</span>`:""}）</td><td class="n">${yen(autoSales)}</td></tr>
+    <tr><td>常連さんのリピート（${keep.length}人）</td><td class="n">${yen(regSales)}</td></tr>
+    <tr class="total"><td>今月の売上</td><td class="n">${yen(monthSales)}</td></tr>
+    <tr><th colspan="2">支出</th></tr>
+    <tr><td>仕入れ${autoBuy?`（自動取り寄せ${autoBuy}箱を含む）`:""}</td><td class="n minus">-${yen(M.orderCost)}</td></tr>
+    <tr><td>家賃・光熱費・雑費</td><td class="n minus">-${yen(fc.rent+fc.util+fc.misc)}</td></tr>
+    <tr><td>人件費${pay?`（スタッフ${S.staff.length}人を含む）`:""}</td><td class="n minus">-${yen(fc.staff+pay)}</td></tr>
+    ${ad?`<tr><td>広告宣伝費</td><td class="n minus">-${yen(ad)}</td></tr>`:""}
+    ${interest?`<tr><td>支払利息</td><td class="n minus">-${yen(interest)}</td></tr>`:""}
+    <tr class="total"><td>今月の収支（現金ベース）</td><td class="n ${flow<0?"bad":"good"}">${yen(flow)}</td></tr>
+   </table>
+   ${dep?`<p class="small">設備の減価償却費 ${yen(dep)}（現金は出ないが、決算で費用になる）</p>`:""}
+   <p class="small">接客結果：◎${cnt("best")+cnt("redOk")}　○${cnt("ok")}　×${cnt("miss")+cnt("unsafe")+cnt("redMiss")}　△${cnt("refer")}
+   ／口コミから新しい常連 +${newRegs}人${regLeft?`／卒業・離脱 ${regLeft}人`:""}${regOut?`／<span class="bad">欠品で離れた常連 ${regOut}人</span>`:""}</p>
+   <p class="small">在庫の評価額（原価）：${yen(invValue())}</p>
+   ${loanMsg}
+   ${overflow?`<p class="warn small">ヒント：評判が上がって手が回らなくなってきた。経営メニューでスタッフの採用を考えよう。</p>`:""}
+   ${regOut||autoLost?`<p class="warn small">ヒント：欠品は機会損失。常連さんが多い漢方は多めに仕入れよう。</p>`:""}
+   </div>
+   <div class="row"><button class="primary" id="e-next">${S.mi===11?"決算へ ▶":"次の月へ ▶"}</button></div>`;
+  $("#e-next").onclick=()=>{if(S.mi===11){show(kessan);return;}S.mi++;show(monthStart);};
+  };
+  show(renderEnd);
+}
+
+// --- 決算（損益計算書＋貸借対照表＋今年の目標） ---
+function kessan(){
+  const Y=S.yr,endInv=invValue();
+  const cogs=Y.invBegin+Y.purchase-endInv;
+  const gross=Y.sales-cogs;
+  const sga=Y.rent+Y.staff+Y.util+Y.ad+Y.misc+Y.dep+Y.other+Y.hire;
+  const op=gross-sga, ord=op-Y.interest;
+  const tax=ord>0?Math.round(ord*0.3)+70000:70000;
+  const net=ord-tax;
+  if(!S.month.kessanDone){
+    S.month.kessanDone=true;
+    if(net>0)S.flags.black=true;
+    if(S.loan===0)S.flags.noloanKessan=true;
+    S.month.missionRes=S.missions.map(id=>{const m=MISSIONS.find(x=>x.id===id);const ok=!!m.c(net);if(ok)S.rep=clamp(S.rep+3,0,100);return [m.n,ok];});
+    checkAch();
+  }
+  const t=S.tot,accPct=Math.round(yearAcc()*100);
+  let title;
+  if(net>=150000&&S.rep>=70) title="地域でたよられる漢方名人";
+  else if(net>=0) title="黒字の堅実薬局";
+  else if(S.rep>=60) title="評判は上々、経営は修行中";
+  else title="まだまだ見習い薬剤師";
+  jingle([523,659,784,1047,784,1047]);
+  // 貸借対照表
+  const book=eqBook();
+  const assets=S.cash+endInv+book, liab=S.loan+tax, retained=assets-liab-S.capital;
+  const row=(l,v,c="")=>`<tr><td>${l}</td><td class="n ${c}">${yen(v)}</td></tr>`;
+  panel.innerHTML=`
+   <div class="speaker">${esc(S.shop)}　${S.fy}年目 決算（4月〜翌3月）　難易度：${DIFF[S.diff].n}</div>
+   <div class="scroll">
+   <h2 class="center">称号「${title}」</h2>
+   <h3>今年の目標</h3>
+   <div class="karte">${S.month.missionRes.map(([n,ok])=>`<div class="${ok?"good":"small"}">${ok?"■ 達成！ 評判+3":"□ 未達成"}　${n}</div>`).join("")}</div>
+   <h3>損益計算書（P/L）</h3>
+   <table>
+    ${row("売上高",Y.sales)}
+    <tr class="sub"><td>　接客 ${yen(Y.salesServe)}／口コミ新規 ${yen(Y.salesAuto)}／常連 ${yen(Y.salesReg)}</td><td></td></tr>
+    ${row("売上原価",-cogs,"minus")}
+    <tr class="sub"><td>　期首棚卸 ${yen(Y.invBegin)}＋当期仕入 ${yen(Y.purchase)}－期末棚卸 ${yen(endInv)}</td><td></td></tr>
+    <tr class="total"><td>売上総利益（粗利）</td><td class="n">${yen(gross)}</td></tr>
+    ${row("地代家賃",-Y.rent,"minus")}
+    ${row("給料手当",-Y.staff,"minus")}
+    ${row("水道光熱費",-Y.util,"minus")}
+    ${row("広告宣伝費",-Y.ad,"minus")}
+    ${Y.hire?row("採用費",-Y.hire,"minus"):""}
+    ${Y.other?row("研修・販促費",-Y.other,"minus"):""}
+    ${Y.dep?row("減価償却費",-Y.dep,"minus"):""}
+    ${row("雑費",-Y.misc,"minus")}
+    <tr class="total"><td>営業利益</td><td class="n ${op<0?"bad":"good"}">${yen(op)}</td></tr>
+    ${row("支払利息",-Y.interest,"minus")}
+    <tr class="total"><td>経常利益</td><td class="n ${ord<0?"bad":"good"}">${yen(ord)}</td></tr>
+    ${row(`法人税等（赤字でも均等割 ${yen(70000)}）`,-tax,"minus")}
+    <tr class="total"><td>当期純利益</td><td class="n ${net<0?"bad":"good"}">${yen(net)}</td></tr>
+   </table>
+   <h3>貸借対照表（B/S・期末）</h3>
+   <table>
+    <tr><th colspan="2">資産の部</th></tr>
+    ${row("現金",S.cash)}
+    ${row("棚卸資産（在庫）",endInv)}
+    ${book?row("設備（帳簿価額）",book):""}
+    <tr class="total"><td>資産合計</td><td class="n">${yen(assets)}</td></tr>
+    <tr><th colspan="2">負債の部</th></tr>
+    ${row("借入金",S.loan,S.loan?"bad":"")}
+    ${row("未払法人税等",tax)}
+    <tr class="total"><td>負債合計</td><td class="n">${yen(liab)}</td></tr>
+    <tr><th colspan="2">純資産の部</th></tr>
+    ${row("資本金",S.capital)}
+    ${row("利益剰余金（これまでの利益の積み上げ）",retained,retained<0?"bad":"")}
+    <tr class="total"><td>負債・純資産合計</td><td class="n">${yen(liab+S.capital+retained)}</td></tr>
+   </table>
+   <p class="small">資産合計と「負債・純資産合計」は必ず同じ金額になります（左右が釣り合うので「バランスシート」）。</p>
+   <h3>成績</h3>
+   <p>接客 ${t.n}人　◎${t.best+t.redOk}　○${t.ok}　×${t.miss}　副作用・安全${t.unsafe}　見のがし${t.redMiss}<br>今年の的中率 ${accPct}%　／ 聴き取り◎ ${t.listen}回　／ 養生◎ ${t.yojo}回　／ 評判 ${Math.round(S.rep)}　／ 常連 ${S.regs.length}人　／ スタッフ ${S.staff.length}人　／ 実績 ${Object.keys(S.ach).length}/${ACH.length}</p>
+   </div>
+   <div class="row">
+     <button class="primary" id="k-next">${S.fy+1}年目へつづける ▶</button>
+     <button id="k-title">タイトルへ</button>
+   </div>`;
+  $("#k-next").onclick=()=>{S.cash-=tax;S.fy++;S.mi=0;S.yr=newYear(endInv);S.yt={};S.missions=pickMissions();checkAch();show(monthStart);};
+  $("#k-title").onclick=()=>{clearSave();S=null;updateHUD();show(titleScreen);};
+}
+$("#btn-ach").onclick=()=>{beep(700,.04);openAch();};
+// ===== 起動 =====
+paintBG();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(paintBG);
+setTimeout(paintBG,1500);
+requestAnimationFrame(frame);
+updateHUD();
+show(titleScreen);
+
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
+</script>
+</body>
+</html>
