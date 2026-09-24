@@ -739,6 +739,205 @@ const FIXED = {rent:70000,staff:50000,util:15000,misc:10000};
 const AD_COST = 30000;
 const COST_RATE = 0.4;       // 仕入原価率
 const PER_MONTH = 6;          // 1か月に接客するお客さんの数
+// ===== お客さんの事例（追加分） =====
+// 同じ症状でも体質で処方が変わる（同病異治）ものを中心に、受診勧奨・飲み合わせの注意を追加
+CASES.push(
+ // ---- 頭痛・肩こり ----
+ {nm:"システム開発 イマムラさん",g:"m",age:34,byo:"kan",mie:"首をぐるぐる回している",
+  say:"肩と首がガチガチで、そこから頭まで痛くなってくるんです。",
+  q:{hie:"冷房で首が冷えると悪化",mizu:"汗はあまりかかない",tsukare:"体力はある",nemuri:"パソコン作業が1日10時間"},
+  best:["kakkon"],ok:["choto"],ex:"無汗・首すじから肩背のこわばりからくる頭痛＝葛根湯はかぜ以外の肩こりにも使われます。"},
+ {nm:"主婦 ムカイさん",g:"f",age:58,red:1,byo:"netsu",mie:"顔をしかめてこめかみを押さえている",
+  say:"さっき急に、バットで殴られたような頭痛がして…頭痛薬ください。",
+  q:{hie:"寒気はない",ben:"吐き気がある",nemuri:"こんな頭痛は生まれて初めて",kusuri:"高血圧の薬を飲み忘れがち"},
+  ex:"突然の、人生最悪の頭痛＝くも膜下出血の疑い。薬を売らず、すぐに救急受診を。"},
+ // ---- かぜ・のど・咳 ----
+ {nm:"元漁師 アンドウさん",g:"m",age:73,old:1,sea:[11,12,1,2,3],byo:"kan",mie:"寒そうに背中を丸めている",
+  say:"水っぽい鼻水とくしゃみが止まらんで、とにかく寒いんじゃ。",
+  q:{hie:"ぞくぞく寒い。熱はほとんどない",mizu:"冷たい水のような鼻水",tsukare:"だるくて横になりたい",kusuri:"持病は特にない。心臓も前立腺も問題なし"},
+  best:["maobushi"],ok:["ryokan","shosei"],ex:"高齢・強い寒気とだるさ・水様の鼻水＝少陰病の麻黄附子細辛湯。心臓や排尿の問題がないことも確認できています。"},
+ {nm:"会社員 オオクボさん",g:"m",age:29,red:1,byo:"netsu",mie:"声がこもっていて、口をあまり開けない",
+  say:"のどの片側がすごく痛くて、つばも飲みこめないんです。",
+  q:{hie:"38.8℃の熱",mizu:"よだれが出てしまう",ben:"食べられない",nemuri:"口が開けにくい。声がこもる"},
+  ex:"片側の強いのどの痛み・口が開かない・こもった声＝扁桃周囲膿瘍の疑い。駆風解毒湯ではなく、すぐ耳鼻科へ。"},
+ {nm:"年金生活 キシモトさん",g:"f",age:78,old:1,red:1,byo:"inkyo",mie:"やせていて、ときどき咳きこむ",
+  say:"咳がもう1か月続いてねえ。咳止めの漢方はないかしら。",
+  q:{hie:"夕方に微熱が出る",mizu:"寝汗をかく。痰に血がまじったことがある",tsukare:"体重が減ってきた",kusuri:"特になし"},
+  ex:"3週間以上つづく咳・微熱・寝汗・体重減少・血痰＝結核や肺の病気の疑い。まず受診が必要です。"},
+ {nm:"小2の母 ミズノさん",g:"k",age:37,red:1,sea:[9,10,11,3,4,5],byo:"hyo",mie:"子どもの呼吸が苦しそう",
+  say:"子どもが夜中からゼーゼーして、横になると苦しいって…。",
+  q:{mizu:"子どもは肩で息をしている",nemuri:"横になれず眠れない",tsukare:"話すのもつらそう",kusuri:"ぜんそくと言われたことがある"},
+  ex:"肩で息をする・横になれない・話しにくい＝ぜんそくの発作。漢方ではなく、すぐ受診を。"},
+ {nm:"5歳児の父 タジマさん",g:"k",age:39,sea:[10,11,12,1,2,3],byo:"hyo",mie:"元気そうな子どもを連れている",
+  say:"子どもがかぜのひきはじめで、寒がって首が痛いって言うんです。",
+  q:{hie:"子どもは寒気がある。熱は37.8℃",mizu:"汗はかいていない",tsukare:"子どもはふだんは元気",kusuri:"持病なし。5歳です"},
+  best:["kakkon"],ok:["keishi"],ex:"子どもでも、寒気・無汗・首のこわばりのかぜ初期なら葛根湯。年齢に合わせて量を減らして飲んでもらいます。"},
+ {nm:"詩吟の先生 オオシロさん",g:"f",age:69,old:1,sea:[10,11,12,1,2,3],byo:"inkyo",mie:"のどをさすっている",
+  say:"夜になると、のどがイガイガして乾いた咳が出るのよ。",
+  q:{hie:"特になし",mizu:"のどが乾燥する。痰はほとんどない",nemuri:"咳で夜中に目が覚める",kusuri:"特になし。かぜはもう治った"},
+  best:["bakumon"],ok:[],ex:"乾燥した空咳・痰が少ない＝潤い不足の麦門冬湯。高齢者の空咳によく使われます。"},
+ // ---- 胃腸 ----
+ {nm:"営業部長 ハマノさん",g:"m",age:51,byo:"suitai",mie:"顔がむくんでいる",
+  say:"ゆうべ飲みすぎて…頭が痛くて、のどがカラカラです。",
+  q:{mizu:"水を飲んでもすぐ渇く。尿が少ない",ben:"少し吐き気",hie:"特になし",tsukare:"ふだんは元気"},
+  best:["gorei"],ok:["oren"],ex:"二日酔いの口渇・尿不利・頭痛＝水のかたよりを整える五苓散。"},
+ {nm:"食品会社 ツチヤさん",g:"m",age:46,byo:"netsu",mie:"口臭を気にしている",
+  say:"胃が熱っぽくて胸やけがするんです。口の中も苦くて…。",
+  q:{hie:"暑がり",ben:"胸やけ・胃がもだえる感じ。口内炎もできやすい",nemuri:"イライラして寝つきが悪い",kusuri:"特になし"},
+  best:["oren"],ok:["hangesha"],ex:"胃の熱（胃熱）・胸やけ・口が苦い・イライラ＝黄連解毒湯。胃の炎症を冷まします。"},
+ {nm:"大学生 ササハラさん",g:"m",age:20,red:1,byo:"netsu",mie:"おなかを押さえて前かがみ",
+  say:"最初はみぞおちが痛かったのに、今は右下のおなかがすごく痛いです。",
+  q:{hie:"37.9℃の熱",ben:"吐き気がある。歩くとおなかにひびく",kusuri:"特になし"},
+  ex:"みぞおちから右下腹部へ移る痛み・発熱＝虫垂炎の疑い。すぐに受診を。"},
+ {nm:"元商店主 マツイさん",g:"m",age:74,old:1,red:1,byo:"kikyo",mie:"以前よりずいぶんやせた",
+  say:"食べものがのどにつかえる感じがして。胃薬の漢方をもらえるかね。",
+  q:{ben:"食べる量がへった。固いものが飲みこみにくい",tsukare:"半年で5kgやせた",kusuri:"長年お酒とタバコ"},
+  ex:"飲みこみにくさ・体重減少・高齢・飲酒喫煙歴＝食道の病気の疑い。半夏厚朴湯などを出す前に受診を。"},
+ {nm:"看護学生 ヒラノさん",g:"f",age:21,byo:"kitai",mie:"緊張しやすそう",
+  say:"試験前になると、おなかがゴロゴロして下痢と便秘をくり返すんです。",
+  q:{ben:"みぞおちがつかえる。おなかが鳴る。下痢と便秘が交互",nemuri:"試験のストレス",hie:"特になし",kusuri:"特になし"},
+  best:["hangesha"],ok:["kami"],ex:"ストレスで悪化する腹鳴・下痢便秘の交互・みぞおちのつかえ＝半夏瀉心湯。"},
+ {nm:"日焼けした ナガタさん",g:"m",age:44,sea:[7,8],byo:"kikyo",mie:"だるそうで汗ばんでいる",
+  say:"夏バテで食欲がなくて、体がだるくてしかたないんです。",
+  q:{mizu:"汗をかきやすい",ben:"食欲がない。軟便ぎみ",tsukare:"だるくて気力がない",nemuri:"寝苦しい"},
+  best:["hochu"],ok:["rikkun"],ex:"夏バテの食欲不振・だるさ・汗＝気虚の補中益気湯。"},
+ // ---- 便秘・痔 ----
+ {nm:"妊娠6か月 オギワラさん",g:"f",age:31,red:1,byo:"inkyo",mie:"おなかがふっくら",
+  say:"妊娠してから便秘がひどくて…。便秘の漢方ってありますか？",
+  q:{ben:"4日出ないこともある",kusuri:"妊娠6か月。産婦人科に通院中",tsukare:"少し疲れやすい"},
+  ex:"便秘の漢方の多くは大黄（下に降ろす作用）を含み、妊娠中は避けたいもの。産婦人科で相談してもらうのが安全です。"},
+ {nm:"保険外交員 シバタさん",g:"f",age:56,byo:"kikyo",mie:"疲れた表情",
+  say:"痔が出てしまって…。疲れるとひどくなるんです。",
+  q:{ben:"便は硬くない。力むと出てくる（脱出する）",tsukare:"とても疲れやすい。声に力がない",hie:"特になし",kusuri:"特になし"},
+  best:["hochu"],ok:["otsuji"],ex:"疲れると出る痔の脱出＝気虚による下垂。補中益気湯で持ち上げます（便秘が主なら乙字湯）。"},
+ {nm:"元会社員 カワカミさん",g:"m",age:71,old:1,red:1,byo:"kekkyo",mie:"顔色が悪い",
+  say:"便に血がまじるんだ。痔だと思うから、痔の漢方を。",
+  q:{ben:"便が細くなった。便秘と下痢をくり返す",tsukare:"体重が減った。立ちくらみ",kusuri:"大腸の検査は受けたことがない"},
+  ex:"血便・便が細い・体重減少・貧血症状＝大腸の病気の疑い。痔と決めつけず、まず受診を。"},
+ // ---- 女性・血 ----
+ {nm:"保育士 ナカオさん",g:"f",age:33,byo:"kitai",mie:"イライラしている様子",
+  say:"生理の前になるとイライラして、胸が張って痛いんです。",
+  q:{hie:"肩こりがある",nemuri:"生理前はささいなことで怒ってしまう",ben:"生理前は便秘ぎみ",kusuri:"特になし"},
+  best:["kami"],ok:["yokkan"],ex:"月経前のイライラ・乳房の張り＝気滞（肝のめぐりの悪さ）。加味逍遙散です。"},
+ {nm:"産後3か月 ヨシカワさん",g:"f",age:32,byo:"kekkyo",mie:"顔色が青白い",
+  say:"出産してから体力が戻らなくて、髪もたくさん抜けるんです。",
+  q:{hie:"手足が冷える",tsukare:"すぐ疲れる。立ちくらみ",mizu:"寝汗",kusuri:"授乳中。産婦人科では異常なし"},
+  best:["juzen"],ok:["toki","hochu"],ex:"産後の気血両虚（疲れ・貧血ぎみ・抜け毛）＝十全大補湯。授乳中でも使われる補剤です。"},
+ {nm:"会社経営 オオハシさん",g:"f",age:49,fat:1,byo:"oketsu",mie:"赤ら顔でがっしり",
+  say:"更年期で、のぼせがひどくて。便秘もガンコなんです。",
+  q:{hie:"上半身がカーッとのぼせる。足は冷える",ben:"3日出ないこともある",nemuri:"イライラ",kusuri:"特になし"},
+  best:["tokaku"],ok:["keibuku","sanou"],ex:"体力があり、強いのぼせ・頑固な便秘＝瘀血＋熱の桃核承気湯。便秘がなければ桂枝茯苓丸。"},
+ {nm:"主婦 エガワさん",g:"f",age:60,red:1,byo:"oketsu",mie:"不安そう",
+  say:"閉経して5年なのに、また出血があって…。血の道の漢方をください。",
+  q:{hie:"特になし",tsukare:"特になし",kusuri:"婦人科には何年も行っていない"},
+  ex:"閉経後の不正出血＝子宮の病気のサインのことも。漢方の前に、婦人科受診をすすめましょう。"},
+ {nm:"大学院生 サトウさん",g:"f",age:24,byo:"kan",mie:"おなかを押さえている",
+  say:"生理痛がきて、おなかがギューッと差しこむように痛いんです！",
+  q:{hie:"冷えるとひどくなる",ben:"特になし",kusuri:"特になし。持病なし",tsukare:"ふだんは元気"},
+  best:["shakukan"],ok:["anchu","toki"],ex:"差しこむような急な筋肉のけいれん痛＝芍薬甘草湯は月経痛の頓服にも。体質改善は当帰芍薬散などで。"},
+ {nm:"パート コウノさん",g:"f",age:50,byo:"oketsu",mie:"がっしり体型",
+  say:"更年期で、のぼせと肩こりがつらくて…。病院の漢方も飲んでるんですけど。",
+  q:{hie:"顔はのぼせ、足は冷える",ben:"便通はふつう",kusuri:"心療内科で抑肝散（甘草入り）を毎日。最近すこしむくむ",tsukare:"体力はある"},
+  best:["keibuku"],ok:[],risk:{kan:1},ex:"すでに甘草入りの漢方を飲んでいて、むくみも出ている。甘草を含まない桂枝茯苓丸を選ぶのが安全です（加味逍遙散は甘草が重複）。"},
+ // ---- 水・めまい ----
+ {nm:"バス運転手 イシダさん",g:"m",age:47,byo:"suitai",mie:"顔や手がむくんでいる",
+  say:"飲み会の次の日は、顔も手もパンパンにむくむんです。",
+  q:{mizu:"のどが渇くのに尿が少ない",ben:"軟便ぎみ",hie:"特になし",kusuri:"特になし"},
+  best:["gorei"],ok:["boi"],ex:"口渇・尿不利・むくみ＝五苓散。水太り体質の汗かきなら防已黄耆湯。"},
+ {nm:"事務員 ハシダさん",g:"f",age:42,byo:"suitai",mie:"目を閉じてじっとしている",
+  say:"ふわふわするめまいがして、立ち上がるとクラッとくるんです。",
+  q:{hie:"のぼせ気味",ben:"胃でチャポチャポ音がする",mizu:"尿が少ない",nemuri:"ドキドキすることがある"},
+  best:["ryokei"],ok:["gorei"],ex:"立ちくらみ・ふらつき・胃内停水・動悸＝苓桂朮甘湯。"},
+ {nm:"元教師 フルカワさん",g:"m",age:68,old:1,red:1,byo:"kan",mie:"ろれつが少しおかしい",
+  say:"朝からめまいがして…右手に力が入りにくいんだ。めまいの漢方を。",
+  q:{hie:"特になし",nemuri:"言葉が出にくい気がする",kusuri:"高血圧と不整脈の薬"},
+  ex:"めまい＋ろれつが回らない＋片側の手の脱力＝脳卒中の疑い。一刻も早く救急へ。"},
+ // ---- こころ・睡眠 ----
+ {nm:"新人営業 モリモトくん",g:"m",age:24,byo:"kitai",mie:"そわそわしている",
+  say:"大事なプレゼンの前になると、のどが詰まった感じで吐きそうになるんです。",
+  q:{nemuri:"緊張しやすく、不安になりやすい",ben:"緊張すると胃がむかむか",kusuri:"特になし"},
+  best:["hange"],ok:["saiboku"],ex:"緊張・不安で起こるのどのつかえと吐き気＝気滞の半夏厚朴湯。"},
+ {nm:"介護中の娘 タカノさん",g:"f",age:55,byo:"kitai",mie:"疲れた表情",
+  say:"認知症の母が、夕方から怒りっぽくなって夜も眠らなくて…。",
+  q:{nemuri:"母は興奮して夜中に歩きまわる",hie:"母は特に冷えない",kusuri:"母は認知症の薬を飲んでいる。主治医は漢方の併用OK",ben:"母の便通はふつう"},
+  best:["yokkan"],ok:["kanbaku"],ex:"興奮・怒りっぽさ・不眠（認知症の行動・心理症状）＝抑肝散。主治医とも連携しましょう。"},
+ {nm:"営業所長 サイトウさん",g:"m",age:53,fat:1,byo:"kitai",mie:"がっしり・落ちつかない",
+  say:"最近、動悸がして寝つけないんです。ちょっとしたことでカッとなって。",
+  q:{nemuri:"不安とイライラ。物音で目が覚める",ben:"便秘ぎみ。脇腹が張る",kusuri:"血圧がやや高め（治療中）",tsukare:"体力はある"},
+  best:["saikoryu"],ok:["daisaiko"],ex:"体力あり・動悸・不眠・イライラ・胸脇苦満＝柴胡加竜骨牡蛎湯。"},
+ {nm:"会社員 ニシダさん",g:"m",age:38,red:1,byo:"kitai",mie:"うつむいて、声が小さい",
+  say:"何もやる気が起きなくて…。よく眠れる漢方はありますか。",
+  q:{nemuri:"2か月ほど、朝早く目が覚めてしまう。好きだった趣味も楽しめない",tsukare:"仕事に行くのがつらい",kusuri:"特になし",ben:"食欲がなく体重が減った"},
+  ex:"2週間以上つづく気分の落ちこみ・興味の喪失・早朝覚醒・体重減少＝うつ病の可能性。漢方より先に、心療内科など専門医への受診をやさしくすすめましょう。"},
+ {nm:"1歳児のママ イワイさん",g:"k",age:30,byo:"kitai",mie:"眠そうな赤ちゃんを抱いている",
+  say:"この子が毎晩夜泣きして、泣きだすと止まらないんです。",
+  q:{nemuri:"赤ちゃんはよくあくびをする。泣きやまない",ben:"赤ちゃんの便はふつう",kusuri:"小児科では異常なし"},
+  best:["kanbaku"],ok:["yokkan"],ex:"泣きやまない夜泣き・あくび＝甘麦大棗湯。怒ってかんしゃくを起こすタイプなら抑肝散。"},
+ {nm:"看護師長 ミヤモトさん",g:"f",age:52,byo:"kekkyo",mie:"疲れきった表情",
+  say:"夜勤明けでくたくたなのに、布団に入ると考えごとで眠れなくて。",
+  q:{nemuri:"くよくよ考えこむ。眠りが浅い",tsukare:"疲れがとれない。物忘れ",mizu:"ときどき微熱っぽい",kusuri:"軽い貧血"},
+  best:["kamikihi"],ok:["sanso"],ex:"心身の疲労・考えこむ不眠・貧血＝加味帰脾湯。"},
+ // ---- 体力・高齢 ----
+ {nm:"小1の祖母 ハヤシさん",g:"k",age:64,byo:"kikyo",mie:"やせた孫を連れている",
+  say:"孫がしょっちゅうかぜをひいて、食も細いんです。",
+  q:{ben:"孫はよくおなかを痛がる。食が細い",mizu:"孫は寝汗をかく",tsukare:"孫は疲れやすい",kusuri:"小児科では異常なし"},
+  best:["shoken"],ok:["hochu"],ex:"虚弱でかぜをひきやすい子ども・腹痛・食が細い＝小建中湯。"},
+ {nm:"元大工 スズキさん",g:"m",age:66,old:1,byo:"jinkyo",mie:"腰をさすっている",
+  say:"足腰がだるくて、夜中のトイレも増えてきたんだ。",
+  q:{hie:"腰から下が冷える",mizu:"夜間頻尿。口が渇く",ben:"胃腸は丈夫",kusuri:"血圧は正常"},
+  best:["hachimi"],ok:["goshajin"],ex:"腰から下の冷えとだるさ・夜間頻尿＝腎虚の八味地黄丸。"},
+ {nm:"書店員 イズミさん",g:"m",age:62,byo:"inkyo",mie:"顔が赤く汗ばんでいる",
+  say:"夜中のトイレと足腰のだるさで。八味地黄丸がいいと聞いたんですけど。",
+  q:{hie:"冷えはない。むしろ手足がほてる。のぼせやすい",mizu:"口が渇く。寝汗",ben:"胃腸はふつう",kusuri:"特になし"},
+  best:["rokumi"],ok:[],risk:{bushi:1},ex:"腎虚でも、ほてり・のぼせがある人に附子入りの八味地黄丸は不向き。附子・桂皮を除いた六味丸が合います。"},
+ {nm:"郵便局員 オダギリさん",g:"m",age:67,old:1,byo:"kikyo",mie:"胃腸が弱そう",
+  say:"尿の切れが悪くて残尿感があるんです。八味地黄丸を飲んだら胃がもたれて…。",
+  q:{hie:"冷え性",ben:"胃腸が弱い。地黄で胃もたれした",mizu:"残尿感・頻尿",nemuri:"イライラして眠れないことも"},
+  best:["seishin"],ok:["ryokyo"],ex:"胃腸虚弱で地黄が合わない人の排尿トラブル＝清心蓮子飲。"},
+ // ---- 皮膚 ----
+ {nm:"中学生の母 アサノさん",g:"k",age:43,byo:"netsu",mie:"ニキビのある中学生を連れている",
+  say:"この子の赤く化膿するニキビ、漢方でなんとかなりませんか。",
+  q:{hie:"子どもは暑がり",mizu:"ニキビが化膿しやすい",ben:"子どもの便通はふつう",kusuri:"皮膚科の塗り薬を使っている"},
+  best:["jumi"],ok:["shofu"],ex:"化膿しやすい炎症性のニキビ＝十味敗毒湯。塗り薬と一緒に使えます。"},
+ {nm:"美容部員 カンザキさん",g:"f",age:27,byo:"kekkyo",mie:"肌が乾燥して赤い",
+  say:"アトピーで、カサカサして赤くてかゆいんです。",
+  q:{hie:"顔はほてりやすい",mizu:"汁は出ない。とにかく乾燥",tsukare:"生理不順ぎみ",kusuri:"皮膚科の塗り薬を使っている"},
+  best:["unsei"],ok:["shofu"],ex:"乾燥（血虚）＋赤み（熱）＝温清飲。ジュクジュクなら消風散。"},
+ {nm:"レストラン店長 ホシノさん",g:"m",age:36,red:1,byo:"netsu",mie:"まぶたと唇が腫れている",
+  say:"エビを食べたら全身にじんましんが出て…息も少し苦しいんです。",
+  q:{mizu:"全身がかゆい。唇が腫れてきた",nemuri:"のどが詰まる感じがする",kusuri:"特になし"},
+  ex:"じんましん＋唇の腫れ＋息苦しさ＝アナフィラキシーの疑い。すぐに救急受診を。"},
+ {nm:"農協職員 タナカさん",g:"m",age:58,red:1,byo:"netsu",mie:"脇腹を気にしている",
+  say:"右の脇腹から背中にかけて、ピリピリ痛くて赤いブツブツが出てきた。",
+  q:{mizu:"帯のように片側だけ水ぶくれ",nemuri:"痛みで眠れない",kusuri:"特になし"},
+  ex:"体の片側に帯状に並ぶ痛い水ぶくれ＝帯状疱疹の疑い。早く受診して抗ウイルス薬を始めることが大切です。"},
+ // ---- 関節・痛み ----
+ {nm:"引っ越し業 オカダさん",g:"m",age:35,byo:"kan",mie:"腰を押さえて動けない",
+  say:"荷物を持ち上げたらギクッときて…腰の筋肉がつっています！",
+  q:{hie:"特になし",mizu:"特になし",kusuri:"特になし。足のしびれはない",tsukare:"ふだんは元気"},
+  best:["shakukan"],ok:["mayoku"],ex:"急な筋肉のけいれんによるぎっくり腰＝芍薬甘草湯の頓服。足のしびれや麻痺があれば受診を。"},
+ {nm:"焼肉店主 イノウエさん",g:"m",age:48,fat:1,red:1,byo:"netsu",mie:"足をひきずっている",
+  say:"朝起きたら足の親指の付け根が真っ赤に腫れて、激痛なんだ！",
+  q:{hie:"その部分が熱い",mizu:"特になし",kusuri:"健診で尿酸値が高いと言われている"},
+  ex:"突然の関節の激痛・赤み・熱感＝痛風発作などの疑い。まず受診して診断を。"},
+ {nm:"元農家 ヤギさん",g:"f",age:75,old:1,byo:"kan",mie:"手の指をさすっている",
+  say:"寒くなると手足の関節がこわばって、しびれて痛むのよ。",
+  q:{hie:"手足が冷たい。温めると楽",mizu:"雨の日に悪化",tsukare:"体力はない",kusuri:"特になし"},
+  best:["keijutsu"],ok:["goshaku"],ex:"冷え・湿気で悪化する関節痛・しびれ＝桂枝加朮附湯。"},
+ // ---- 飲み合わせ・安全 ----
+ {nm:"塾講師 ウエノさん",g:"f",age:40,sea:[2,3,4,5],byo:"suitai",mie:"鼻をかんでいる",
+  say:"花粉症で水っぽい鼻水が止まらないんです。小青竜湯をください。",
+  q:{hie:"冷えやすい",mizu:"サラサラの鼻水とくしゃみ",nemuri:"動悸がすることがある",kusuri:"甲状腺の病気（バセドウ病）で治療中"},
+  best:["ryokan"],ok:[],risk:{mao:1},ex:"甲状腺機能亢進症の治療中で動悸もある。麻黄は動悸を強めるおそれがあるので、麻黄を含まない苓甘姜味辛夏仁湯を。"},
+ {nm:"不動産業 ハラさん",g:"m",age:55,red:1,byo:"hyo",mie:"疲れた様子",
+  say:"かぜがこじれてね。小柴胡湯っていうのがいいんだろ？",
+  q:{hie:"微熱が続く",ben:"食欲がない",kusuri:"C型肝炎でインターフェロン治療中"},
+  ex:"インターフェロン治療中の人に小柴胡湯は禁忌（間質性肺炎の危険）。自己判断で売らず、主治医に相談してもらいましょう。"},
+ {nm:"建築士 ミナミさん",g:"m",age:61,red:1,byo:"netsu",mie:"胸をさすっている",
+  say:"最近、坂道を歩くと胸が重くなって…胸やけだと思うんだけど。",
+  q:{hie:"特になし",ben:"食事とは関係ない。休むとおさまる",kusuri:"高血圧・脂質異常症の薬",tsukare:"息切れもする"},
+  ex:"歩くと起こり休むとおさまる胸の圧迫感＝狭心症の疑い。胸やけの漢方ではなく循環器の受診を。"}
+);
 // ===== ユーティリティ =====
 const $ = s => document.querySelector(s);
 const panel = $("#panel");
@@ -928,6 +1127,7 @@ function custEnter(look,done){scene.cust={look,x:236,tx:128,bubble:null,onArrive
 function custLeave(done){if(!scene.cust)return done&&done();scene.cust.bubble=null;scene.cust.tx=280;scene.cust.onArrive=()=>{scene.cust=null;done&&done();};}
 
 // ===== ゲーム状態 =====
+// ※ 開業・月のはじめ・仕入れ・月末・決算の処理は part4（経営の拡張）にまとめています
 let S=null, C=null, current=null;
 const SAVE_KEY="dot-kampo-save-v2";
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
@@ -935,16 +1135,6 @@ function loadSave(){try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.par
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 const SURN=["アオキ","イデ","ウチダ","エノモト","オギノ","カジ","キクチ","クドウ","コウノ","サノ","シバタ","スガ","セキ","ソノダ","タキ","チバ","ツルタ","テラダ","トミタ","ナイトウ","ニイミ","ノグチ","ハタ","ヒロセ","フジイ","ホシノ","マキ","ミズノ","ムトウ","メグロ","ヤギ","ユアサ","ヨネダ","ワカバヤシ"];
 
-function newGame(shop){
-  const stock={};FIDS.forEach(id=>stock[id]=0);
-  S={shop,fy:1,mi:0,cash:1500000,rep:20,stock,
-     regs:["hochu","toki","hachimi","kami","rikkun"].map(f=>({f,nm:pick(SURN)})),
-     loan:0,ad:false,yr:newYear(0),
-     tot:{best:0,ok:0,miss:0,unsafe:0,redOk:0,redMiss:0,refer:0,n:0,yojo:0,listen:0},
-     month:null};
-}
-function newYear(invBegin){return {invBegin,sales:0,salesServe:0,salesAuto:0,salesReg:0,purchase:0,rent:0,staff:0,util:0,misc:0,ad:0,interest:0,served:0};}
-function invValue(){return FIDS.reduce((s,id)=>s+(S.stock[id]||0)*cost(id),0);}
 function regCount(id){return S.regs.filter(r=>r.f===id).length;}
 function curMonth(){return MONTHS[S.mi];}
 function inSeason(cs,m){const sea=cs.sea||[];return !sea.length?1:(sea.includes(m)?3:0.15);}
@@ -989,99 +1179,9 @@ function titleScreen(){
   if(sv) $("#b-cont").onclick=()=>{beep(784,.1);S=migrate(sv);show(monthStart);};
   $("#b-how").onclick=()=>openHelp();
 }
-function nameScreen(){
-  const ideas=["ひだまり漢方堂","せき漢方薬局","さくら薬局","みどり漢方堂","まるやく漢方"];
-  panel.innerHTML=`
-   <div class="speaker">薬局の名前をきめよう</div>
-   <p class="small">看板にかかげる屋号です（10文字まで）。</p>
-   <input id="shop-name" type="text" maxlength="10" value="${esc(DEFAULT_SHOP)}" aria-label="薬局の名前" autocomplete="off">
-   <div class="tabs">${ideas.map(n=>`<button type="button" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
-   <div class="row"><button class="primary" id="n-ok">この名前で開業する ▶</button><button id="n-back">◀ もどる</button></div>`;
-  const inp=$("#shop-name");
-  const preview=()=>{scene.shop=inp.value.trim()||DEFAULT_SHOP;};
-  inp.oninput=preview;inp.onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)$("#n-ok").click();};
-  panel.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{inp.value=b.dataset.n;preview();beep(600,.03);});
-  $("#n-ok").onclick=()=>{const nm=(inp.value.trim()||DEFAULT_SHOP).slice(0,10);newGame(nm);jingle([523,659,784,1047]);fx("開業！","#f8b800",188,40);show(monthStart);};
-  $("#n-back").onclick=()=>show(titleScreen);
-  preview();
-}
 
-// ===== 月のはじめ =====
-function monthStart(){
-  const m=curMonth();
-  if(!S.month||S.month.key!==S.fy+"-"+S.mi||(S.month.served===0&&!S.month.ordered)){
-    S.month={key:S.fy+"-"+S.mi,served:0,queue:buildQueue(m),log:[],sales:0,orderCost:0,follow:false};
-    save();
-  }
-  panel.innerHTML=`
-   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ できごと</div>
-   <div class="msg" id="m-msg"></div>
-   <div class="small">今月の固定費：家賃 ${yen(FIXED.rent)}／人件費 ${yen(FIXED.staff)}／水道光熱 ${yen(FIXED.util)}／雑費 ${yen(FIXED.misc)}${S.loan?`／借入利息あり`:""}</div>
-   <div class="row"><button class="primary" id="b-order">仕入れをする ▶</button></div>`;
-  typeInto($("#m-msg"),EVENTS[m]+(S.mi===0&&S.fy===1?`\n\n「${S.shop}」開業！ 前の店主から常連さんを5人引きついだ。まずは漢方の在庫を仕入れよう。`:""));
-  $("#b-order").onclick=()=>show(orderScreen);
-}
-function buildQueue(m){
-  const q=[];const pool=CASES.slice();
-  while(q.length<PER_MONTH&&pool.length){
-    const c=weightedPick(pool,cs=>inSeason(cs,m)*(cs.red?0.45:1));
-    q.push(CASES.indexOf(c));pool.splice(pool.indexOf(c),1);
-  }
-  return q;
-}
 
-// ===== 仕入れ =====
-let order={}, ordTab="all";
-function suggest(id){
-  const f=F[id],m=curMonth();
-  const seasonal=CASES.filter(cs=>!cs.red&&cs.best[0]===id).reduce((s,cs)=>s+inSeason(cs,m),0);
-  const want=regCount(id)+Math.ceil(seasonal*(f.acute?1.2:0.8))+(f.acute?0:1);
-  return Math.max(0,want-S.stock[id]);
-}
 function catTabs(id,cur){return `<div class="tabs" id="${id}">${CATS.map(([k,l])=>`<button class="${k===cur?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;}
-function orderScreen(){
-  if(!Object.keys(order).length) FIDS.forEach(id=>order[id]=0);
-  const total=FIDS.reduce((s,id)=>s+order[id]*cost(id),0);
-  const ids=FIDS.filter(id=>ordTab==="all"||F[id].cat===ordTab);
-  panel.innerHTML=`
-   <div class="speaker">仕入れ（1箱＝1か月分／かぜ薬など急性向けは1週間分・原価は売価の${COST_RATE*100}%）</div>
-   ${catTabs("o-tabs",ordTab)}
-   <div class="list">${ids.map(id=>{const f=F[id];return `
-     <div class="order-row">
-       <div>${f.n}${badges(f)}<div class="small">在庫 ${S.stock[id]}／常連 ${regCount(id)}人／原価 ${yen(cost(id))}</div></div>
-       <span class="rd small">${yen(f.p)}</span>
-       <button data-id="${id}" data-d="-1" aria-label="${f.n}をへらす">－</button>
-       <span class="q">${order[id]}</span>
-       <button data-id="${id}" data-d="1" aria-label="${f.n}をふやす">＋</button>
-     </div>`;}).join("")}</div>
-   <div>仕入れ合計 <b class="warn">${yen(total)}</b>　のこり現金 <b class="${S.cash-total<0?"bad":""}">${yen(S.cash-total)}</b></div>
-   <label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="o-ad" ${S.ad?"checked":""}> 今月チラシ広告を出す（${yen(AD_COST)}・口コミ新規が増える）</label>
-   <div class="row">
-     <button id="o-auto">おまかせ発注</button>
-     <button id="o-clear">クリア</button>
-     <button class="primary" id="o-ok" ${S.cash-total<0?"disabled":""}>これで仕入れる ▶</button>
-     ${S.cash<300000?`<button class="danger" id="o-loan">銀行から借りる（${yen(500000)}・年利1.5%）</button>`:""}
-   </div>`;
-  panel.querySelectorAll("#o-tabs button").forEach(b=>b.onclick=()=>{ordTab=b.dataset.k;orderScreen();});
-  panel.querySelectorAll(".order-row button").forEach(b=>b.onclick=()=>{const id=b.dataset.id;order[id]=clamp(order[id]+ +b.dataset.d,0,99);beep(520,.03);const y=panel.querySelector(".list").scrollTop;orderScreen();panel.querySelector(".list").scrollTop=y;});
-  $("#o-ad").onchange=e=>{S.ad=e.target.checked;};
-  $("#o-auto").onclick=()=>{
-    FIDS.forEach(id=>order[id]=suggest(id));
-    // 現金の範囲におさめる（常連さんの分を優先して残す）
-    let tot=FIDS.reduce((s,id)=>s+order[id]*cost(id),0);const budget=Math.max(0,S.cash-50000);
-    if(tot>budget){const ids=FIDS.slice().sort((a,b)=>regCount(a)-regCount(b));
-      let guard=0;while(tot>budget&&guard++<5000){let cut=false;for(const id of ids){if(tot<=budget)break;if(order[id]>regCount(id)||(order[id]>0&&guard>200)){order[id]--;tot-=cost(id);cut=true;}}if(!cut)break;}}
-    beep(660,.06);orderScreen();};
-  const lb=$("#o-loan");if(lb)lb.onclick=()=>{S.loan+=500000;S.cash+=500000;jingle([523,659]);fx("借入 +"+yen(500000),"#fc7460",170,70);orderScreen();};
-  $("#o-clear").onclick=()=>{FIDS.forEach(id=>order[id]=0);orderScreen();};
-  $("#o-ok").onclick=()=>{
-    FIDS.forEach(id=>{S.stock[id]+=order[id];});
-    S.cash-=total;S.yr.purchase+=total;S.month.orderCost=total;S.month.ordered=true;
-    order={};jingle([392,523,659]);
-    if(total>0)fx("仕入れ -"+yen(total),"#fc7460",170,70);
-    maybeFollow();
-  };
-}
 
 // ===== 経過確認（常連さんのフォロー） =====
 function maybeFollow(){
@@ -1270,7 +1370,7 @@ function resolve(id,yojo){
   }
   let yojoMsg="";
   if(yojo&&kind!=="unsafe"&&kind!=="redMiss"){
-    if(yojo.v>0){rep+=1;pRep+=0.1;t.yojo++;S.yt.yojo=(S.yt.yojo||0)+1;yojoMsg=`<span class="good">養生◎</span> 体質に合った養生を、寄りそって伝えられた。`;}
+    if(yojo.v>0){rep+=1;pRep+=0.1;t.yojo++;S.yt.yojo=(S.yt.yojo||0)+1;const g=sellYojoGoods(cs.byo);yojoMsg=`<span class="good">養生◎</span> 体質に合った養生を、寄りそって伝えられた。`+(g?`<br><span class="warn">「${esc(g)}」もいっしょに買ってくれた！</span>`:"");}
     else if(yojo.v===0){pRep-=0.1;yojoMsg=`<span class="warn">養生△</span> 体質（${BYO[cs.byo].n}）に合わない養生だった。`;}
     else{rep-=1;pRep-=0.25;yojoMsg=`<span class="bad">養生×</span> 内容は合っていたが、上から目線の言い方でお客さんが萎縮してしまった。`;}
   }
@@ -1305,121 +1405,7 @@ function resolve(id,yojo){
   show(renderResult);
 }
 
-// ===== 月末 =====
-function monthEnd(){
-  const m=curMonth(),Y=S.yr,M=S.month;
-  const nAuto=4+Math.floor(S.rep/5)+(S.ad?4:0);
-  const acc=accuracy();
-  let autoSales=0,autoOk=0,autoLost=0,newRegs=0;
-  const pool=CASES.filter(c=>!c.red);
-  for(let i=0;i<nAuto;i++){
-    const cs=weightedPick(pool,c=>inSeason(c,m));const id=cs.best[0];
-    if(S.stock[id]<=0){autoLost++;continue;}
-    S.stock[id]--;autoSales+=F[id].p;
-    if(Math.random()<0.35+0.6*acc){autoOk++;if(!F[id].acute&&Math.random()<0.5){S.regs.push({f:id,nm:pick(SURN)});newRegs++;}}
-    else S.rep=clamp(S.rep-0.5,0,100);
-  }
-  let regSales=0,regLeft=0,regOut=0;const keep=[];
-  S.regs.forEach(r=>{
-    if(Math.random()<0.04){regLeft++;return;}
-    if(S.stock[r.f]>0){S.stock[r.f]--;regSales+=F[r.f].p;keep.push(r);}
-    else{regOut++;}
-  });
-  S.regs=keep;S.rep=clamp(S.rep-regOut+Math.min(2,keep.length/20),0,100);
-  const ad=S.ad?AD_COST:0;const interest=Math.round(S.loan*0.015/12);
-  const fixed=FIXED.rent+FIXED.staff+FIXED.util+FIXED.misc+ad+interest;
-  S.cash+=autoSales+regSales-fixed;
-  Y.sales+=autoSales+regSales;Y.salesAuto+=autoSales;Y.salesReg+=regSales;
-  Y.rent+=FIXED.rent;Y.staff+=FIXED.staff;Y.util+=FIXED.util;Y.misc+=FIXED.misc;Y.ad+=ad;Y.interest+=interest;
-  const monthSales=M.sales+autoSales+regSales;
-  const flow=monthSales-M.orderCost-fixed;
-  let loanMsg="";
-  if(S.cash<0){S.loan+=1000000;S.cash+=1000000;loanMsg=`<p class="bad">⚠ 資金がショート！ 銀行から ${yen(1000000)} を借り入れた（年利1.5%）。</p>`;}
-  S.ad=false;
-  if(autoSales+regSales){jingle([523,587,659,784]);fx("+"+yen(autoSales+regSales),"#f8b800",150,86);}
-  const cnt=k=>M.log.filter(l=>l.kind===k).length;
-  const renderEnd=()=>{panel.innerHTML=`
-   <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ 月次レポート</div>
-   <div class="scroll">
-   <table>
-    <tr><th colspan="2">売上</th></tr>
-    <tr><td>接客での販売（${M.log.length}人）</td><td class="n">${yen(M.sales)}</td></tr>
-    <tr><td>口コミ新規（${nAuto}人来店／満足${autoOk}人${autoLost?`／<span class="bad">欠品${autoLost}人</span>`:""}）</td><td class="n">${yen(autoSales)}</td></tr>
-    <tr><td>常連さんのリピート（${keep.length}人）</td><td class="n">${yen(regSales)}</td></tr>
-    <tr class="total"><td>今月の売上</td><td class="n">${yen(monthSales)}</td></tr>
-    <tr><th colspan="2">支出</th></tr>
-    <tr><td>仕入れ</td><td class="n minus">-${yen(M.orderCost)}</td></tr>
-    <tr><td>家賃・人件費・光熱費・雑費</td><td class="n minus">-${yen(FIXED.rent+FIXED.staff+FIXED.util+FIXED.misc)}</td></tr>
-    ${ad?`<tr><td>広告宣伝費</td><td class="n minus">-${yen(ad)}</td></tr>`:""}
-    ${interest?`<tr><td>支払利息</td><td class="n minus">-${yen(interest)}</td></tr>`:""}
-    <tr class="total"><td>今月の収支（現金ベース）</td><td class="n ${flow<0?"bad":"good"}">${yen(flow)}</td></tr>
-   </table>
-   <p class="small">接客結果：◎${cnt("best")+cnt("redOk")}　○${cnt("ok")}　×${cnt("miss")+cnt("unsafe")+cnt("redMiss")}　△${cnt("refer")}
-   ／口コミから新しい常連 +${newRegs}人${regLeft?`／卒業・離脱 ${regLeft}人`:""}${regOut?`／<span class="bad">欠品で離れた常連 ${regOut}人</span>`:""}</p>
-   <p class="small">在庫の評価額（原価）：${yen(invValue())}</p>
-   ${loanMsg}
-   ${regOut||autoLost?`<p class="warn small">ヒント：欠品は機会損失。常連さんが多い漢方は多めに仕入れよう。</p>`:""}
-   </div>
-   <div class="row"><button class="primary" id="e-next">${S.mi===11?"決算へ ▶":"次の月へ ▶"}</button></div>`;
-  $("#e-next").onclick=()=>{if(S.mi===11){show(kessan);return;}S.mi++;show(monthStart);};
-  };
-  show(renderEnd);
-}
 
-// ===== 決算 =====
-function kessan(){
-  const Y=S.yr,endInv=invValue();
-  const cogs=Y.invBegin+Y.purchase-endInv;
-  const gross=Y.sales-cogs;
-  const sga=Y.rent+Y.staff+Y.util+Y.ad+Y.misc;
-  const op=gross-sga, ord=op-Y.interest;
-  const tax=ord>0?Math.round(ord*0.3)+70000:70000;
-  const net=ord-tax;
-  const t=S.tot,accPct=Math.round(accuracy()*100);
-  let title;
-  if(net>=150000&&S.rep>=70) title="地域でたよられる漢方名人";
-  else if(net>=0) title="黒字の堅実薬局";
-  else if(S.rep>=60) title="評判は上々、経営は修行中";
-  else title="まだまだ見習い薬剤師";
-  jingle([523,659,784,1047,784,1047]);
-  panel.innerHTML=`
-   <div class="speaker">${esc(S.shop)}　${S.fy}年目 決算（4月〜翌3月）</div>
-   <div class="scroll">
-   <h2 class="center">称号「${title}」</h2>
-   <h3>損益計算書</h3>
-   <table>
-    <tr><td>売上高</td><td class="n">${yen(Y.sales)}</td></tr>
-    <tr class="sub"><td>　接客 ${yen(Y.salesServe)}／口コミ新規 ${yen(Y.salesAuto)}／常連 ${yen(Y.salesReg)}</td><td></td></tr>
-    <tr><td>売上原価</td><td class="n minus">-${yen(cogs)}</td></tr>
-    <tr class="sub"><td>　期首棚卸 ${yen(Y.invBegin)}＋当期仕入 ${yen(Y.purchase)}－期末棚卸 ${yen(endInv)}</td><td></td></tr>
-    <tr class="total"><td>売上総利益（粗利）</td><td class="n">${yen(gross)}</td></tr>
-    <tr><td>地代家賃</td><td class="n minus">-${yen(Y.rent)}</td></tr>
-    <tr><td>給料手当</td><td class="n minus">-${yen(Y.staff)}</td></tr>
-    <tr><td>水道光熱費</td><td class="n minus">-${yen(Y.util)}</td></tr>
-    <tr><td>広告宣伝費</td><td class="n minus">-${yen(Y.ad)}</td></tr>
-    <tr><td>雑費</td><td class="n minus">-${yen(Y.misc)}</td></tr>
-    <tr class="total"><td>営業利益</td><td class="n ${op<0?"bad":"good"}">${yen(op)}</td></tr>
-    <tr><td>支払利息</td><td class="n minus">-${yen(Y.interest)}</td></tr>
-    <tr class="total"><td>経常利益</td><td class="n ${ord<0?"bad":"good"}">${yen(ord)}</td></tr>
-    <tr><td>法人税等（赤字でも均等割 ${yen(70000)}）</td><td class="n minus">-${yen(tax)}</td></tr>
-    <tr class="total"><td>当期純利益</td><td class="n ${net<0?"bad":"good"}">${yen(net)}</td></tr>
-   </table>
-   <h3>財産のようす（期末）</h3>
-   <table>
-    <tr><td>現金（税金支払前）</td><td class="n">${yen(S.cash)}</td></tr>
-    <tr><td>棚卸資産（在庫）</td><td class="n">${yen(endInv)}</td></tr>
-    <tr><td>借入金</td><td class="n ${S.loan?"bad":""}">${yen(S.loan)}</td></tr>
-   </table>
-   <h3>成績</h3>
-   <p>接客 ${t.n}人　◎${t.best+t.redOk}　○${t.ok}　×${t.miss}　副作用・安全${t.unsafe}　見のがし${t.redMiss}<br>証の的中率 ${accPct}%　／ 聴き取り◎ ${t.listen}回　／ 養生◎ ${t.yojo}回　／ 評判 ${Math.round(S.rep)}　／ 常連 ${S.regs.length}人</p>
-   </div>
-   <div class="row">
-     <button class="primary" id="k-next">${S.fy+1}年目へつづける ▶</button>
-     <button id="k-title">タイトルへ</button>
-   </div>`;
-  $("#k-next").onclick=()=>{S.cash-=tax;S.fy++;S.mi=0;S.yr=newYear(endInv);show(monthStart);};
-  $("#k-title").onclick=()=>{clearSave();S=null;updateHUD();show(titleScreen);};
-}
 
 // ===== ずかん・きほん =====
 let zTab="all";
@@ -1473,6 +1459,9 @@ function openHelp(){
     <h3>経営のしくみ</h3>
     <p>・<b class="warn">スタッフ</b>：店主が対応できる口コミ新規は月${OWNER_CAP}人まで。登録販売者・パート薬剤師を雇うと対応できる人数が増える（給料は毎月）。事務スタッフは仕入れ値の交渉や欠品対策。<br>
        ・<b class="warn">設備</b>：相談ブース・舌診ライト・煎じ薬コーナー・看板・在庫管理システム。買った金額は5年かけて「減価償却費」になる。<br>
+       ・<b class="warn">広告</b>：チラシ・Web広告は毎月つづく広告（経営メニュー）。看板・店主の顔出し看板は設備。お客さんが増えると雑貨も売れる。<br>
+       ・<b class="warn">雑貨・健康食品</b>：生姜湯やクコの実など。仕入れの「雑貨・健康食品」タブで仕入れる。養生アドバイスがぴったりだと、関連する雑貨もいっしょに買ってくれる。<br>
+       ・<b class="warn">借入と返済</b>：月末に現金が足りないと自動で借り入れ。経営メニューの「借入・返済」でいつでも返せる。<br>
        ・<b class="warn">出来事</b>：ライバル店の開店、インフルエンザ流行、原料の値上げ、健康フェアなど。<br>
        ・<b class="warn">目標と実績</b>：毎年3つの目標（達成で評判+3）と、ずっと残る実績。画面左下の「実績」で確認。<br>
        ・<b class="warn">決算書</b>：損益計算書（1年のもうけ）と貸借対照表（期末の財産と借金）。</p>
@@ -1511,7 +1500,9 @@ const EQUIP = {
   light:{n:"舌診ライト",       price:80000,  d:"舌の色がよく見える。舌を見ても問診の回数が減らない"},
   senji:{n:"煎じ薬コーナー",   price:500000, d:"煎じ薬も扱える。慢性向け漢方の売価+20%"},
   sign: {n:"看板リニューアル", price:200000, d:"目立つ看板で、口コミ新規が月に3人増える"},
-  pos:  {n:"在庫管理システム", price:150000, d:"欠品しそうな漢方を自動で取り寄せ。欠品で常連さんが離れない"}
+  pos:  {n:"在庫管理システム", price:150000, d:"欠品しそうな漢方を自動で取り寄せ。欠品で常連さんが離れない"},
+  kao:  {n:"店主の顔出し看板", price:100000, d:"店主の顔と一言が入った看板。親しみがわき口コミ新規+2人、常連になりやすさ+5%、導入時に評判+3"},
+  shelf:{n:"雑貨・健康食品の棚", price:100000, d:"生姜湯やお茶を並べる棚。来店したお客さんが雑貨を買う確率が上がる"}
 };
 const OWNER_CAP = 10; // 店主（あなた）と既存パートで対応できる口コミ新規の人数／月
 
@@ -1580,7 +1571,9 @@ function migrate(s){
   s.diff=s.diff||"normal"; s.staff=s.staff||[]; s.eq=s.eq||{}; s.ach=s.ach||{}; s.flags=s.flags||{};
   s.costRate=s.costRate||COST_RATE; s.capital=s.capital||1500000; s.yt=s.yt||{};
   s.missions=s.missions||pickMissions(); s.tot.yojo=s.tot.yojo||0; s.tot.listen=s.tot.listen||0;
-  ["dep","other","hire"].forEach(k=>{if(s.yr[k]==null)s.yr[k]=0;});
+  ["dep","other","hire","salesGoods"].forEach(k=>{if(s.yr[k]==null)s.yr[k]=0;});
+  s.gstock=s.gstock||{};GIDS.forEach(id=>{if(s.gstock[id]==null)s.gstock[id]=0;});
+  if(!s.ads){s.ads={flyer:!!s.ad,web:false};}
   return s;
 }
 function checkAch(){
@@ -1596,9 +1589,10 @@ function newGame(shop,diff){
      regs:["hochu","toki","hachimi","kami","rikkun"].map(f=>({f,nm:pick(SURN)})),
      loan:0,ad:false,yr:newYear(0),costRate:COST_RATE,staff:[],eq:{},ach:{},flags:{},rival:false,
      tot:{best:0,ok:0,miss:0,unsafe:0,redOk:0,redMiss:0,refer:0,n:0,yojo:0,listen:0},
-     yt:{},missions:pickMissions(),month:null};
+     yt:{},missions:pickMissions(),month:null,gstock:{},ads:{flyer:false,web:false}};
+  GIDS.forEach(id=>S.gstock[id]=0);
 }
-function newYear(invBegin){return {invBegin,sales:0,salesServe:0,salesAuto:0,salesReg:0,purchase:0,rent:0,staff:0,util:0,misc:0,ad:0,interest:0,served:0,dep:0,other:0,hire:0};}
+function newYear(invBegin){return {invBegin,salesGoods:0,sales:0,salesServe:0,salesAuto:0,salesReg:0,purchase:0,rent:0,staff:0,util:0,misc:0,ad:0,interest:0,served:0,dep:0,other:0,hire:0};}
 
 let newDiff="normal";
 function nameScreen(){
@@ -1650,8 +1644,8 @@ function monthStart(){
    <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ できごと</div>
    <div class="msg" id="m-msg"></div>
    ${ev?`<div class="karte"><div class="warn">★ ${esc(ev.text)}</div>${ev.choice&&!S.month.evDone?`<div class="row"><button class="primary" id="ev-yes">${ev.choice.yes}</button><button id="ev-no">${ev.choice.no}</button></div>`:""}</div>`:""}
-   <div class="small">固定費：家賃 ${yen(fc.rent)}／人件費 ${yen(fc.staff+staffPay())}／光熱 ${yen(fc.util)}／雑費 ${yen(fc.misc)}${S.loan?`／借入利息あり`:""}　原価率 ${Math.round(costRate()*100)}%${S.rival?"　<span class='bad'>ライバル店あり</span>":""}</div>
-   <div class="row"><button id="b-keiei">経営メニュー（スタッフ・設備）</button><button id="b-goal">今年の目標</button><button class="primary" id="b-order" ${ev&&ev.choice&&!S.month.evDone?"disabled":""}>仕入れをする ▶</button></div>`;
+   <div class="small">今月の支払い予定 ${yen(monthlyOut())}（家賃 ${yen(fc.rent)}／人件費 ${yen(fc.staff+staffPay())}／光熱 ${yen(fc.util)}／雑費 ${yen(fc.misc)}${adCost()?`／広告 ${yen(adCost())}`:""}${S.loan?`／利息 ${yen(Math.round(S.loan*0.015/12))}`:""}）<br>現金 ${yen(S.cash)}${S.loan?`／<span class="bad">借入 ${yen(S.loan)}</span>`:""}　原価率 ${Math.round(costRate()*100)}%${S.rival?"　<span class='bad'>ライバル店あり</span>":""}</div>
+   <div class="row"><button id="b-keiei">経営メニュー（スタッフ・設備・広告・借入）</button><button id="b-goal">今年の目標</button><button class="primary" id="b-order" ${ev&&ev.choice&&!S.month.evDone?"disabled":""}>仕入れをする ▶</button></div>`;
   typeInto($("#m-msg"),EVENTS[m]+(S.mi===0&&S.fy===1?`\n\n「${S.shop}」開業！ 前の店主から常連さんを5人引きついだ。まずは漢方の在庫を仕入れよう。`:""));
   if(ev&&ev.choice&&!S.month.evDone){
     $("#ev-yes").onclick=()=>{const c=ev.choice;if(S.cash<c.cost){fx("お金が足りない","#fc7460");return;}
@@ -1665,34 +1659,6 @@ function monthStart(){
   $("#b-order").onclick=()=>show(orderScreen);
 }
 
-// --- 経営メニュー ---
-let keieiTab="staff";
-function keieiScreen(){
-  const tabs=`<div class="tabs" id="k-tabs">${[["staff","スタッフ"],["equip","設備"]].map(([k,l])=>`<button class="${k===keieiTab?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;
-  let body="";
-  if(keieiTab==="staff"){
-    body=`<p class="small">口コミで来る新規のお客さんは、店主だけだと月${OWNER_CAP}人までしか対応できません。評判が上がったらスタッフを増やそう（採用費 ${yen(HIRE_COST)}）。</p>
-     <div class="list">${Object.entries(STAFF).map(([k,st])=>{const hired=S.staff.find(s=>s.k===k);
-       return `<div class="order-row" style="grid-template-columns:1fr auto">
-         <div>${st.n}　<span class="small">月給 ${yen(st.pay)}${hired&&st.skill?`／対応力 ${Math.round(hired.skill*100)}`:""}</span><div class="small">${st.d}</div></div>
-         ${hired?`<button data-fire="${k}" class="danger">やめてもらう</button>`:`<button data-hire="${k}" class="primary" ${S.cash<HIRE_COST?"disabled":""}>採用する</button>`}
-       </div>`;}).join("")}</div>
-     <div class="row"><button id="k-train" ${!S.staff.some(s=>STAFF[s.k].skill)||S.month.trained||S.cash<TRAIN_COST?"disabled":""}>スタッフ研修（${yen(TRAIN_COST)}・対応力+5）${S.month.trained?"／今月は実施済み":""}</button></div>`;
-  }else{
-    body=`<p class="small">設備は買った月から5年かけて費用にします（減価償却）。決算書の「設備」にのります。</p>
-     <div class="list">${Object.entries(EQUIP).map(([k,e])=>`<div class="order-row" style="grid-template-columns:1fr auto">
-       <div>${e.n}　<span class="small">${yen(e.price)}</span><div class="small">${e.d}</div></div>
-       ${S.eq[k]?`<span class="good small">導入済み</span>`:`<button data-buy="${k}" class="primary" ${S.cash<e.price?"disabled":""}>導入する</button>`}
-     </div>`).join("")}</div>`;
-  }
-  panel.innerHTML=`<div class="speaker">経営メニュー　<span class="small">現金 ${yen(S.cash)}</span></div>${tabs}${body}<div class="row"><button id="k-back">◀ もどる</button></div>`;
-  panel.querySelectorAll("#k-tabs button").forEach(b=>b.onclick=()=>{keieiTab=b.dataset.k;keieiScreen();});
-  panel.querySelectorAll("[data-hire]").forEach(b=>b.onclick=()=>{const k=b.dataset.hire;S.cash-=HIRE_COST;S.yr.hire+=HIRE_COST;S.staff.push({k,skill:STAFF[k].skill});jingle([523,659,784]);fx(STAFF[k].n+"を採用！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
-  panel.querySelectorAll("[data-fire]").forEach(b=>b.onclick=()=>{const k=b.dataset.fire;S.staff=S.staff.filter(s=>s.k!==k);beep(330,.1);save();keieiScreen();});
-  panel.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const k=b.dataset.buy;const e=EQUIP[k];S.cash-=e.price;S.eq[k]={price:e.price,dep:0};jingle([523,659,784,1047]);fx(e.n+"を導入！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
-  const tr=$("#k-train");if(tr)tr.onclick=()=>{S.cash-=TRAIN_COST;S.yr.other+=TRAIN_COST;S.month.trained=true;S.staff.forEach(s=>{if(STAFF[s.k].skill)s.skill=Math.min(0.9,s.skill+0.05);});jingle([659,784]);save();keieiScreen();updateHUD();};
-  $("#k-back").onclick=()=>show(monthStart);
-}
 
 // --- 今年の目標・実績 ---
 function goalScreen(){
@@ -1712,18 +1678,185 @@ function openAch(){
   $("#a-close").onclick=()=>back?show(back):show(titleScreen);
 }
 
-// --- 月末（スタッフ・設備・ライバル・減価償却） ---
+
+$("#btn-ach").onclick=()=>{beep(700,.04);openAch();};
+// ===== 経営の拡張（2）：雑貨・広告・借入と返済・仕入れ・月末・決算 =====
+
+// --- 雑貨・健康食品（養生と連動） ---
+const GOODS = {
+  shogayu: {n:"生姜湯",           p:600,  byo:["kan","hyo"],        sea:[11,12,1,2]},
+  nodoame: {n:"漢方のど飴",       p:300,  byo:["hyo","inkyo"],      sea:[10,11,12,1,2,3]},
+  kuko:    {n:"クコの実",         p:800,  byo:["kekkyo","inkyo","jinkyo"], sea:[]},
+  natsume: {n:"乾燥ナツメ",       p:900,  byo:["kekkyo","kikyo"],   sea:[]},
+  hatomugi:{n:"ハトムギ茶",       p:700,  byo:["suitai"],           sea:[5,6,7,8,9]},
+  kuromame:{n:"黒豆茶",           p:700,  byo:["jinkyo"],           sea:[]},
+  herbtea: {n:"ハーブティー（ミント・ラベンダー）", p:900, byo:["kitai"], sea:[]},
+  yakuzen: {n:"薬膳スープの素",   p:800,  byo:["kikyo","kan"],      sea:[10,11,12,1,2]},
+  nyuyoku: {n:"生薬入浴剤",       p:500,  byo:["kan","oketsu"],     sea:[10,11,12,1,2,3]},
+  okyu:    {n:"お灸セット",       p:1500, byo:["oketsu","jinkyo","kan"], sea:[]},
+  mugicha: {n:"麦茶・冷えない水出し茶", p:500, byo:["netsu"],       sea:[6,7,8]}
+};
+const GIDS = Object.keys(GOODS);
+const GOODS_COST = 0.55;
+const gcost = id => Math.round(GOODS[id].p*GOODS_COST);
+function gSeason(id,m){const s=GOODS[id].sea;return !s.length?1:(s.includes(m)?2.5:0.3);}
+function goodsRate(){return 0.12+S.rep/400+(hasEq("shelf")?0.12:0);}
+// 養生アドバイスがうまくいったとき、関連する雑貨をすすめて買ってもらう
+function sellYojoGoods(byo){
+  if(!S||!S.gstock)return null;
+  const cands=GIDS.filter(id=>GOODS[id].byo.includes(byo)&&S.gstock[id]>0);
+  if(!cands.length)return null;
+  const id=pick(cands);S.gstock[id]--;const p=GOODS[id].p;
+  S.cash+=p;S.yr.sales+=p;S.yr.salesGoods+=p;S.month.sales+=p;S.month.goods=(S.month.goods||0)+p;
+  return GOODS[id].n;
+}
+
+// --- 広告（毎月つづく。経営メニューでオン・オフ） ---
+const ADS = {
+  flyer:{n:"チラシ（新聞折込・ポスティング）", cost:30000, d:"近所のお年寄りに届きやすい。口コミ新規 +4人/月"},
+  web:  {n:"Web広告（SNS・地図アプリ）",       cost:20000, d:"若い人に届きやすい。口コミ新規 +3人/月（評判50以上なら +5人）"}
+};
+function adCost(){return Object.keys(ADS).reduce((s,k)=>s+(S.ads&&S.ads[k]?ADS[k].cost:0),0);}
+function adDemand(){return (S.ads.flyer?4:0)+(S.ads.web?(S.rep>=50?5:3):0);}
+
+// --- 在庫の評価額（漢方＋雑貨） ---
+function invValue(){return FIDS.reduce((s,id)=>s+(S.stock[id]||0)*cost(id),0)+GIDS.reduce((s,id)=>s+((S.gstock&&S.gstock[id])||0)*gcost(id),0);}
+function monthlyOut(){const fc=fixedCosts();return fc.rent+fc.staff+fc.util+fc.misc+staffPay()+adCost()+Math.round(S.loan*0.015/12);}
+
+// --- 仕入れ ---
+let order={}, gorder={}, ordTab="all";
+function suggest(id){
+  const f=F[id],m=curMonth();
+  const seasonal=CASES.filter(cs=>!cs.red&&cs.best[0]===id).reduce((s,cs)=>s+inSeason(cs,m),0);
+  const want=regCount(id)+Math.ceil(seasonal*(f.acute?1.2:0.8)*(S.month&&S.month.flu&&f.acute?2:1))+(f.acute?0:1);
+  return Math.max(0,want-S.stock[id]);
+}
+function gsuggest(id){
+  const m=curMonth();const visitors=6+Math.min(40,4+S.rep/5)+S.regs.length;
+  const tw=GIDS.reduce((s,g)=>s+gSeason(g,m),0);
+  const want=Math.ceil(visitors*goodsRate()*gSeason(id,m)/tw)+1;
+  return Math.max(0,want-S.gstock[id]);
+}
+function orderScreen(){
+  if(!Object.keys(order).length){FIDS.forEach(id=>order[id]=0);GIDS.forEach(id=>gorder[id]=0);}
+  const total=FIDS.reduce((s,id)=>s+order[id]*cost(id),0)+GIDS.reduce((s,id)=>s+gorder[id]*gcost(id),0);
+  const isG=ordTab==="zakka";
+  const ids=isG?GIDS:FIDS.filter(id=>ordTab==="all"||F[id].cat===ordTab);
+  const out=monthlyOut();const after=S.cash-total-out;
+  panel.innerHTML=`
+   <div class="speaker">仕入れ（1箱＝1か月分／かぜ薬など急性向けは1週間分・原価率 漢方${Math.round(costRate()*100)}%・雑貨${GOODS_COST*100}%）</div>
+   <div class="tabs" id="o-tabs">${CATS.concat([["zakka","雑貨・健康食品"]]).map(([k,l])=>`<button class="${k===ordTab?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>
+   <div class="list">${ids.map(id=>{const f=isG?GOODS[id]:F[id];const st=isG?S.gstock[id]:S.stock[id];const q=isG?gorder[id]:order[id];const c=isG?gcost(id):cost(id);return `
+     <div class="order-row">
+       <div>${f.n}${isG?"":badges(f)}<div class="small">在庫 ${st}${isG?"":`／常連 ${regCount(id)}人`}／原価 ${yen(c)}</div></div>
+       <span class="rd small">${yen(isG?f.p:priceOf(id))}</span>
+       <button data-id="${id}" data-d="-1" aria-label="${f.n}をへらす">－</button>
+       <span class="q">${q}</span>
+       <button data-id="${id}" data-d="1" aria-label="${f.n}をふやす">＋</button>
+     </div>`;}).join("")}</div>
+   <div>仕入れ合計 <b class="warn">${yen(total)}</b>　仕入れ後の現金 <b class="${S.cash-total<0?"bad":""}">${yen(S.cash-total)}</b></div>
+   <div class="small">今月の支払い予定（家賃・人件費・光熱費・雑費・広告${S.loan?"・利息":""}）：${yen(out)}
+     ${after<0?`<br><span class="bad">⚠ このままだと月末の支払いで現金が約${yen(-after)}足りなくなり、銀行から自動で借り入れます（売上が入れば足りることもあります）。</span>`:""}</div>
+   <div class="row">
+     <button id="o-auto">おまかせ発注</button>
+     <button id="o-clear">クリア</button>
+     <button class="primary" id="o-ok" ${S.cash-total<0?"disabled":""}>これで仕入れる ▶</button>
+     ${S.cash<300000?`<button class="danger" id="o-loan">銀行から借りる（${yen(500000)}）</button>`:""}
+   </div>`;
+  panel.querySelectorAll("#o-tabs button").forEach(b=>b.onclick=()=>{ordTab=b.dataset.k;orderScreen();});
+  panel.querySelectorAll(".order-row button").forEach(b=>b.onclick=()=>{const id=b.dataset.id;const o=isG?gorder:order;o[id]=clamp(o[id]+ +b.dataset.d,0,99);beep(520,.03);const y=panel.querySelector(".list").scrollTop;orderScreen();panel.querySelector(".list").scrollTop=y;});
+  $("#o-auto").onclick=()=>{
+    FIDS.forEach(id=>order[id]=suggest(id));GIDS.forEach(id=>gorder[id]=gsuggest(id));
+    // 現金の範囲におさめる（雑貨→常連さんのいない漢方の順に減らす）
+    let tot=FIDS.reduce((s,id)=>s+order[id]*cost(id),0)+GIDS.reduce((s,id)=>s+gorder[id]*gcost(id),0);
+    const budget=Math.max(0,S.cash-50000);
+    if(tot>budget){GIDS.forEach(id=>{tot-=gorder[id]*gcost(id);gorder[id]=0;});}
+    if(tot>budget){const ids=FIDS.slice().sort((a,b)=>regCount(a)-regCount(b));
+      let guard=0;while(tot>budget&&guard++<5000){let cut=false;for(const id of ids){if(tot<=budget)break;if(order[id]>regCount(id)||(order[id]>0&&guard>200)){order[id]--;tot-=cost(id);cut=true;}}if(!cut)break;}}
+    beep(660,.06);orderScreen();};
+  $("#o-clear").onclick=()=>{FIDS.forEach(id=>order[id]=0);GIDS.forEach(id=>gorder[id]=0);orderScreen();};
+  const lb=$("#o-loan");if(lb)lb.onclick=()=>{borrow(500000);orderScreen();};
+  $("#o-ok").onclick=()=>{
+    FIDS.forEach(id=>{S.stock[id]+=order[id];});GIDS.forEach(id=>{S.gstock[id]+=gorder[id];});
+    S.cash-=total;S.yr.purchase+=total;S.month.orderCost=total;S.month.ordered=true;
+    order={};gorder={};jingle([392,523,659]);
+    if(total>0)fx("仕入れ -"+yen(total),"#fc7460",170,70);
+    maybeFollow();
+  };
+}
+
+// --- 借入と返済 ---
+function borrow(a){S.loan+=a;S.cash+=a;jingle([523,659]);fx("借入 +"+yen(a),"#fc7460",170,70);save();updateHUD();}
+function repay(a){a=Math.min(a,S.loan,S.cash);if(a<=0)return;S.loan-=a;S.cash-=a;jingle([659,784,1047]);fx("返済 -"+yen(a),"#58d854",170,70);checkAch();save();updateHUD();}
+
+// --- 経営メニュー ---
+let keieiTab="staff";
+function keieiScreen(){
+  const T=[["staff","スタッフ"],["equip","設備"],["ads","広告"],["money","借入・返済"]];
+  const tabs=`<div class="tabs" id="k-tabs">${T.map(([k,l])=>`<button class="${k===keieiTab?"on":""}" data-k="${k}">${l}</button>`).join("")}</div>`;
+  let body="";
+  if(keieiTab==="staff"){
+    body=`<p class="small">口コミで来る新規のお客さんは、店主だけだと月${OWNER_CAP}人までしか対応できません。評判が上がったらスタッフを増やそう（採用費 ${yen(HIRE_COST)}）。</p>
+     <div class="list">${Object.entries(STAFF).map(([k,st])=>{const hired=S.staff.find(s=>s.k===k);
+       return `<div class="order-row" style="grid-template-columns:1fr auto">
+         <div>${st.n}　<span class="small">月給 ${yen(st.pay)}${hired&&st.skill?`／対応力 ${Math.round(hired.skill*100)}`:""}</span><div class="small">${st.d}</div></div>
+         ${hired?`<button data-fire="${k}" class="danger">やめてもらう</button>`:`<button data-hire="${k}" class="primary" ${S.cash<HIRE_COST?"disabled":""}>採用する</button>`}
+       </div>`;}).join("")}</div>
+     <div class="row"><button id="k-train" ${!S.staff.some(s=>STAFF[s.k].skill)||S.month.trained||S.cash<TRAIN_COST?"disabled":""}>スタッフ研修（${yen(TRAIN_COST)}・対応力+5）${S.month.trained?"／今月は実施済み":""}</button></div>`;
+  }else if(keieiTab==="equip"){
+    body=`<p class="small">設備は買った月から5年かけて費用にします（減価償却）。決算書の「設備」にのります。</p>
+     <div class="list">${Object.entries(EQUIP).map(([k,e])=>`<div class="order-row" style="grid-template-columns:1fr auto">
+       <div>${e.n}　<span class="small">${yen(e.price)}</span><div class="small">${e.d}</div></div>
+       ${S.eq[k]?`<span class="good small">導入済み</span>`:`<button data-buy="${k}" class="primary" ${S.cash<e.price?"disabled":""}>導入する</button>`}
+     </div>`).join("")}</div>`;
+  }else if(keieiTab==="ads"){
+    body=`<p class="small">広告はオンにすると毎月つづきます（月末に支払い）。看板・顔出し看板は「設備」で導入できます。お客さんが増えると、雑貨も売れやすくなります。</p>
+     <div class="list">${Object.entries(ADS).map(([k,a])=>`<div class="order-row" style="grid-template-columns:1fr auto">
+       <div>${a.n}　<span class="small">月 ${yen(a.cost)}</span><div class="small">${a.d}</div></div>
+       <button data-ad="${k}" class="${S.ads[k]?"danger":"primary"}">${S.ads[k]?"やめる":"出す"}</button>
+     </div>`).join("")}</div>
+     <p class="small">広告費の合計：月 ${yen(adCost())}　／　今月ふえる口コミ新規：約${adDemand()+(hasEq("sign")?3:0)+(hasEq("kao")?2:0)}人（看板・顔出し看板を含む）</p>`;
+  }else{
+    const interest=Math.round(S.loan*0.015/12);
+    body=`<table>
+       <tr><td>借入金の残り</td><td class="n ${S.loan?"bad":""}">${yen(S.loan)}</td></tr>
+       <tr><td>毎月の利息（年1.5%）</td><td class="n">${yen(interest)}</td></tr>
+       <tr><td>現金</td><td class="n">${yen(S.cash)}</td></tr>
+       <tr><td>今月の支払い予定</td><td class="n">${yen(monthlyOut())}</td></tr>
+     </table>
+     <p class="small">返すと利息が減り、決算までに0円にすれば「無借金経営」の実績も取れます。仕入れや今月の支払いの分の現金は残しておきましょう。</p>
+     <div class="row">
+       ${[100000,500000].map(a=>`<button data-repay="${a}" ${S.loan<=0||S.cash<Math.min(a,S.loan)?"disabled":""}>${yen(a)}返す</button>`).join("")}
+       <button class="primary" data-repay="all" ${S.loan<=0||S.cash<S.loan?"disabled":""}>全額返す（${yen(S.loan)}）</button>
+     </div>
+     <div class="row"><button class="danger" data-borrow="500000">${yen(500000)}借りる</button></div>`;
+  }
+  panel.innerHTML=`<div class="speaker">経営メニュー　<span class="small">現金 ${yen(S.cash)}${S.loan?`／借入 ${yen(S.loan)}`:""}</span></div>${tabs}${body}<div class="row"><button id="k-back">◀ もどる</button></div>`;
+  panel.querySelectorAll("#k-tabs button").forEach(b=>b.onclick=()=>{keieiTab=b.dataset.k;keieiScreen();});
+  panel.querySelectorAll("[data-hire]").forEach(b=>b.onclick=()=>{const k=b.dataset.hire;S.cash-=HIRE_COST;S.yr.hire+=HIRE_COST;S.staff.push({k,skill:STAFF[k].skill});jingle([523,659,784]);fx(STAFF[k].n+"を採用！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
+  panel.querySelectorAll("[data-fire]").forEach(b=>b.onclick=()=>{const k=b.dataset.fire;S.staff=S.staff.filter(s=>s.k!==k);beep(330,.1);save();keieiScreen();});
+  panel.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const k=b.dataset.buy;const e=EQUIP[k];S.cash-=e.price;S.eq[k]={price:e.price,dep:0};
+    if(k==="kao"){S.rep=clamp(S.rep+3,0,100);}
+    jingle([523,659,784,1047]);fx(e.n+"を導入！","#58d854",150,70);checkAch();save();keieiScreen();updateHUD();});
+  panel.querySelectorAll("[data-ad]").forEach(b=>b.onclick=()=>{const k=b.dataset.ad;S.ads[k]=!S.ads[k];beep(S.ads[k]?784:330,.06);save();keieiScreen();});
+  panel.querySelectorAll("[data-repay]").forEach(b=>b.onclick=()=>{const v=b.dataset.repay;repay(v==="all"?S.loan:+v);keieiScreen();});
+  panel.querySelectorAll("[data-borrow]").forEach(b=>b.onclick=()=>{borrow(+b.dataset.borrow);keieiScreen();});
+  const tr=$("#k-train");if(tr)tr.onclick=()=>{S.cash-=TRAIN_COST;S.yr.other+=TRAIN_COST;S.month.trained=true;S.staff.forEach(s=>{if(STAFF[s.k].skill)s.skill=Math.min(0.9,s.skill+0.05);});jingle([659,784]);save();keieiScreen();updateHUD();};
+  $("#k-back").onclick=()=>show(monthStart);
+}
+
+// --- 月末 ---
 function monthEnd(){
   const m=curMonth(),Y=S.yr,M=S.month;
-  let demand=4+Math.floor(S.rep/5)+(S.ad?4:0)+(hasEq("sign")?3:0)+(M.bonus||0);
+  let demand=4+Math.floor(S.rep/5)+adDemand()+(hasEq("sign")?3:0)+(hasEq("kao")?2:0)+(M.bonus||0);
   if(S.rival) demand-=S.rep>=60?1:3;
   demand=Math.max(0,demand);
   const acc=accuracy();
-  // 対応できる人：店主→スタッフの順
   const handlers=[{n:OWNER_CAP,skill:0.35+0.6*acc}];
   S.staff.forEach(s=>{const st=STAFF[s.k];if(st.cap)handlers.push({n:st.cap,skill:s.skill});});
   let autoSales=0,autoOk=0,autoLost=0,newRegs=0,overflow=0,served=0;
   const pool=CASES.filter(c=>!c.red);
+  const regBonus=(hasEq("booth")?0.05:0)+(hasEq("kao")?0.05:0);
   for(let i=0;i<demand;i++){
     let h=handlers.find(x=>x.n>0);
     if(!h){overflow++;continue;}
@@ -1731,7 +1864,7 @@ function monthEnd(){
     if(S.stock[id]<=0){autoLost++;continue;}
     h.n--;served++;
     S.stock[id]--;autoSales+=priceOf(id);
-    if(Math.random()<h.skill){autoOk++;if(!F[id].acute&&Math.random()<0.5+(hasEq("booth")?0.05:0)){S.regs.push({f:id,nm:pick(SURN)});newRegs++;}}
+    if(Math.random()<h.skill){autoOk++;if(!F[id].acute&&Math.random()<0.5+regBonus){S.regs.push({f:id,nm:pick(SURN)});newRegs++;}}
     else S.rep=clamp(S.rep-0.5,0,100);
   }
   if(overflow)S.rep=clamp(S.rep-Math.min(3,overflow*0.3),0,100);
@@ -1746,46 +1879,64 @@ function monthEnd(){
     else regOut++;
   });
   S.regs=keep;S.rep=clamp(S.rep-regOut+Math.min(2,keep.length/20),0,100);
+  // 雑貨（来店したお客さんがついでに買う）
+  const visitors=M.log.length+served+keep.length;
+  let gSales=0,gSold=0,gLost=0;const gRate=goodsRate();
+  const gw=GIDS.map(id=>gSeason(id,m));
+  for(let i=0;i<visitors;i++){
+    if(Math.random()>=gRate)continue;
+    const id=weightedPick(GIDS,g=>gw[GIDS.indexOf(g)]);
+    if(S.gstock[id]>0){S.gstock[id]--;gSales+=GOODS[id].p;gSold++;}else gLost++;
+  }
   // 支払い
   const fc=fixedCosts(),pay=staffPay();
-  const ad=S.ad?AD_COST:0;const interest=Math.round(S.loan*0.015/12);
+  const ad=adCost();const interest=Math.round(S.loan*0.015/12);
   let dep=0;Object.values(S.eq).forEach(e=>{const d=Math.min(Math.round(e.price/60),e.price-e.dep);e.dep+=d;dep+=d;});
   const cashOut=fc.rent+fc.staff+pay+fc.util+fc.misc+ad+interest;
-  S.cash+=autoSales+regSales-cashOut;
-  Y.sales+=autoSales+regSales;Y.salesAuto+=autoSales;Y.salesReg+=regSales;
+  const cashBefore=S.cash;
+  S.cash+=autoSales+regSales+gSales-cashOut;
+  Y.sales+=autoSales+regSales+gSales;Y.salesAuto+=autoSales;Y.salesReg+=regSales;Y.salesGoods+=gSales;
   Y.rent+=fc.rent;Y.staff+=fc.staff+pay;Y.util+=fc.util;Y.misc+=fc.misc;Y.ad+=ad;Y.interest+=interest;Y.dep+=dep;
-  const monthSales=M.sales+autoSales+regSales;
+  const goodsMonth=(M.goods||0)+gSales;
+  const monthSales=M.sales+autoSales+regSales+gSales;
   const flow=monthSales-M.orderCost-cashOut;
   let loanMsg="";
-  if(S.cash<0){S.loan+=1000000;S.cash+=1000000;loanMsg=`<p class="bad">⚠ 資金がショート！ 銀行から ${yen(1000000)} を借り入れた（年利1.5%）。</p>`;}
-  S.ad=false;
+  if(S.cash<0){
+    const short=-S.cash;const amt=Math.ceil((short+100000)/100000)*100000;
+    S.loan+=amt;S.cash+=amt;
+    loanMsg=`<div class="karte"><div class="bad">⚠ 資金がショートしました</div>
+      <div class="small">月末の支払い前の現金 ${yen(cashBefore)} ＋ 月末に入った売上（口コミ新規・常連・雑貨） ${yen(autoSales+regSales+gSales)} － 支払い ${yen(cashOut)} ＝ <span class="bad">${yen(-short)}</span></div>
+      <div class="small">足りない分に少し余裕を足して、銀行から <b class="warn">${yen(amt)}</b> を自動で借り入れました（年利1.5%）。経営メニューの「借入・返済」から、いつでも返せます。</div></div>`;
+  }
   checkAch();
-  if(autoSales+regSales){jingle([523,587,659,784]);fx("+"+yen(autoSales+regSales),"#f8b800",150,86);}
+  if(autoSales+regSales+gSales){jingle([523,587,659,784]);fx("+"+yen(autoSales+regSales+gSales),"#f8b800",150,86);}
   const cnt=k=>M.log.filter(l=>l.kind===k).length;
   const renderEnd=()=>{panel.innerHTML=`
    <div class="speaker">${esc(S.shop)}　${S.fy}年目 ${m}月 ─ 月次レポート</div>
    <div class="scroll">
    <table>
     <tr><th colspan="2">売上</th></tr>
-    <tr><td>接客での販売（${M.log.length}人）</td><td class="n">${yen(M.sales)}</td></tr>
+    <tr><td>接客での販売（${M.log.length}人）</td><td class="n">${yen(M.sales-(M.goods||0))}</td></tr>
     <tr><td>口コミ新規（来店${demand}人／対応${served}人・満足${autoOk}人${autoLost?`／<span class="bad">欠品${autoLost}人</span>`:""}${overflow?`／<span class="bad">手が回らず${overflow}人帰った</span>`:""}）</td><td class="n">${yen(autoSales)}</td></tr>
     <tr><td>常連さんのリピート（${keep.length}人）</td><td class="n">${yen(regSales)}</td></tr>
+    <tr><td>雑貨・健康食品（${gSold}点${gLost?`／<span class="bad">品切れ${gLost}点</span>`:""}${M.goods?"・養生のおすすめを含む":""}）</td><td class="n">${yen(goodsMonth)}</td></tr>
     <tr class="total"><td>今月の売上</td><td class="n">${yen(monthSales)}</td></tr>
     <tr><th colspan="2">支出</th></tr>
     <tr><td>仕入れ${autoBuy?`（自動取り寄せ${autoBuy}箱を含む）`:""}</td><td class="n minus">-${yen(M.orderCost)}</td></tr>
     <tr><td>家賃・光熱費・雑費</td><td class="n minus">-${yen(fc.rent+fc.util+fc.misc)}</td></tr>
     <tr><td>人件費${pay?`（スタッフ${S.staff.length}人を含む）`:""}</td><td class="n minus">-${yen(fc.staff+pay)}</td></tr>
-    ${ad?`<tr><td>広告宣伝費</td><td class="n minus">-${yen(ad)}</td></tr>`:""}
-    ${interest?`<tr><td>支払利息</td><td class="n minus">-${yen(interest)}</td></tr>`:""}
+    ${ad?`<tr><td>広告宣伝費（${Object.keys(ADS).filter(k=>S.ads[k]).map(k=>ADS[k].n.split("（")[0]).join("・")}）</td><td class="n minus">-${yen(ad)}</td></tr>`:""}
+    ${interest?`<tr><td>支払利息（借入 ${yen(S.loan)}）</td><td class="n minus">-${yen(interest)}</td></tr>`:""}
     <tr class="total"><td>今月の収支（現金ベース）</td><td class="n ${flow<0?"bad":"good"}">${yen(flow)}</td></tr>
    </table>
    ${dep?`<p class="small">設備の減価償却費 ${yen(dep)}（現金は出ないが、決算で費用になる）</p>`:""}
    <p class="small">接客結果：◎${cnt("best")+cnt("redOk")}　○${cnt("ok")}　×${cnt("miss")+cnt("unsafe")+cnt("redMiss")}　△${cnt("refer")}
    ／口コミから新しい常連 +${newRegs}人${regLeft?`／卒業・離脱 ${regLeft}人`:""}${regOut?`／<span class="bad">欠品で離れた常連 ${regOut}人</span>`:""}</p>
-   <p class="small">在庫の評価額（原価）：${yen(invValue())}</p>
+   <p class="small">月末の現金：${yen(S.cash)}${S.loan?`／借入金：${yen(S.loan)}`:""}　在庫の評価額（原価）：${yen(invValue())}</p>
    ${loanMsg}
    ${overflow?`<p class="warn small">ヒント：評判が上がって手が回らなくなってきた。経営メニューでスタッフの採用を考えよう。</p>`:""}
    ${regOut||autoLost?`<p class="warn small">ヒント：欠品は機会損失。常連さんが多い漢方は多めに仕入れよう。</p>`:""}
+   ${gLost>2?`<p class="warn small">ヒント：雑貨が品切れしていた。仕入れの「雑貨・健康食品」タブで補充しよう。</p>`:""}
    </div>
    <div class="row"><button class="primary" id="e-next">${S.mi===11?"決算へ ▶":"次の月へ ▶"}</button></div>`;
   $("#e-next").onclick=()=>{if(S.mi===11){show(kessan);return;}S.mi++;show(monthStart);};
@@ -1816,10 +1967,10 @@ function kessan(){
   else if(S.rep>=60) title="評判は上々、経営は修行中";
   else title="まだまだ見習い薬剤師";
   jingle([523,659,784,1047,784,1047]);
-  // 貸借対照表
   const book=eqBook();
   const assets=S.cash+endInv+book, liab=S.loan+tax, retained=assets-liab-S.capital;
   const row=(l,v,c="")=>`<tr><td>${l}</td><td class="n ${c}">${yen(v)}</td></tr>`;
+  const kampoSales=Y.sales-Y.salesGoods;
   panel.innerHTML=`
    <div class="speaker">${esc(S.shop)}　${S.fy}年目 決算（4月〜翌3月）　難易度：${DIFF[S.diff].n}</div>
    <div class="scroll">
@@ -1829,7 +1980,7 @@ function kessan(){
    <h3>損益計算書（P/L）</h3>
    <table>
     ${row("売上高",Y.sales)}
-    <tr class="sub"><td>　接客 ${yen(Y.salesServe)}／口コミ新規 ${yen(Y.salesAuto)}／常連 ${yen(Y.salesReg)}</td><td></td></tr>
+    <tr class="sub"><td>　漢方 ${yen(kampoSales)}（接客 ${yen(Y.salesServe)}／口コミ新規 ${yen(Y.salesAuto)}／常連 ${yen(Y.salesReg)}）<br>　雑貨・健康食品 ${yen(Y.salesGoods)}</td><td></td></tr>
     ${row("売上原価",-cogs,"minus")}
     <tr class="sub"><td>　期首棚卸 ${yen(Y.invBegin)}＋当期仕入 ${yen(Y.purchase)}－期末棚卸 ${yen(endInv)}</td><td></td></tr>
     <tr class="total"><td>売上総利益（粗利）</td><td class="n">${yen(gross)}</td></tr>
@@ -1851,7 +2002,7 @@ function kessan(){
    <table>
     <tr><th colspan="2">資産の部</th></tr>
     ${row("現金",S.cash)}
-    ${row("棚卸資産（在庫）",endInv)}
+    ${row("棚卸資産（漢方・雑貨の在庫）",endInv)}
     ${book?row("設備（帳簿価額）",book):""}
     <tr class="total"><td>資産合計</td><td class="n">${yen(assets)}</td></tr>
     <tr><th colspan="2">負債の部</th></tr>
@@ -1874,7 +2025,6 @@ function kessan(){
   $("#k-next").onclick=()=>{S.cash-=tax;S.fy++;S.mi=0;S.yr=newYear(endInv);S.yt={};S.missions=pickMissions();checkAch();show(monthStart);};
   $("#k-title").onclick=()=>{clearSave();S=null;updateHUD();show(titleScreen);};
 }
-$("#btn-ach").onclick=()=>{beep(700,.04);openAch();};
 // ===== 起動 =====
 paintBG();
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(paintBG);
